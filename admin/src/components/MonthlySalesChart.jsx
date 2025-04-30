@@ -1,0 +1,64 @@
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+
+const MonthlySalesChart = () => {
+  const data = {
+    labels: ['Tháng 1', 'Tháng 2 ', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
+             'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+    datasets: [
+      {
+        label: 'Sales',
+        data: [150, 370, 190, 290, 170, 180, 280, 90, 190, 370, 270, 90],
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+        barThickness: 24
+      }
+    ]
+  };
+
+  const options = {
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 100, color: '#6b7280' },
+        grid: { color: '#e5e7eb' }
+      },
+      x: {
+        ticks: { color: '#374151' },
+        grid: { display: false }
+      }
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow p-6 w-full max-w-2xl mx-auto my-5">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Doanh thu theo tháng</h2>
+        <button className="text-gray-400 hover:text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+               className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" />
+          </svg>
+        </button>
+      </div>
+      <Bar data={data} options={options} height={200} />
+    </div>
+  );
+};
+
+export default MonthlySalesChart;
