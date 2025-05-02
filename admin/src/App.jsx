@@ -1,29 +1,42 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Navbar from './components/Navbar'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/Sidebar';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import AddDoctor from './pages/AddDoctor';
+import { AdminContext } from './context/AdminContext';
+import { DoctorContext } from './context/DoctorContext';
+import Login from './pages/Login';
+
 
 
 function App() {
+  const {aToken} = useContext(AdminContext)
+  const {dToken} = useContext(DoctorContext)
 
-  return (
+
+  return aToken || dToken ? (
     <div className='bg-[#F8F9FD]'>
+      <ToastContainer />
       <Navbar />
       <div className='flex items-start'>
         <Sidebar />
         <Routes>
-          <Route path='/trangchu' element={<Home/>} />
-          <Route path='/thembacsi' element={<AddDoctor/>} />
+          <Route path='/admin/trangchu' element={<Home/>} />
+          <Route path='/admin/thembacsi' element={<AddDoctor/>} />
         </Routes>
       </div>
 
       
 
     </div>
+  ) : (
+    <>
+      <Login />
+      <ToastContainer />
+    </>
   )
 }
 
