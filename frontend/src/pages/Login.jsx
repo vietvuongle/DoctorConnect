@@ -56,8 +56,8 @@ const Login = () => {
 
 
   return (
-    <form onSubmit={onSubmitHandler} className='flex items-center'>
-      <div className='flex flex-col gap-3 m-auto border sm:min-w-96 rounded-xl p-8 min-w-[340px] text-zinc-600 text-sm shadow-lg'>
+    <form onSubmit={onSubmitHandler} className='flex items-center h-screen'>
+      <div className='flex flex-col gap-3 mx-auto  border sm:min-w-96 rounded-xl p-8 min-w-[340px] text-zinc-600 text-sm shadow-lg'>
         <p className='text-3xl font-semibold text-center'>{state === "Đăng Kí" ? "Đăng Kí" : "Đăng Nhập"}</p>
         {
           state === "Đăng Kí" && (

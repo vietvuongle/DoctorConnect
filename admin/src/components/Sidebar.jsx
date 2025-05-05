@@ -2,7 +2,7 @@ import React from 'react'
 import { assets } from '../assets/assets'
 import { NavLink } from 'react-router-dom'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import { pink } from '@mui/material/colors';
+import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined';
 
 
 const Sidebar = () => {
@@ -30,13 +30,8 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/admin/khoa'}>
-          <img src={assets.people_icon} alt="" />
+          <StickyNote2OutlinedIcon sx={{fontSize: 30, color: '#1c274c'}}/>
           <p className='hidden md:block'>Danh sách khoa</p>
-        </NavLink>
-
-        <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/admin/themkhoa'}>
-          <img src={assets.add_icon} alt="" />
-          <p className='hidden md:block'>Thêm khoa</p>
         </NavLink>
 
         <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/admin/chat'}>
