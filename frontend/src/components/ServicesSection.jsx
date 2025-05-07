@@ -1,6 +1,8 @@
 import React from "react";
 import { Stethoscope as StethoscopeIcon, Heart as HeartIcon, Brain as BrainIcon, Pill as PillIcon, Baby as BabyIcon, Eye as EyeIcon } from "lucide-react";
 import { assets } from "../assets/assets";
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
 
 export function ServicesSection() {
     const services = [
@@ -35,6 +37,9 @@ export function ServicesSection() {
             description: "Khám và điều trị các bệnh về mắt với công nghệ và thiết bị hiện đại.",
         },
     ];
+
+    const { departmentData } = useContext(AppContext);
+
     return (
         <section id="services" className="py-16 bg-white">
             <div className="container mx-auto px-4">
@@ -43,12 +48,12 @@ export function ServicesSection() {
                     <p className="text-gray-600 max-w-2xl mx-auto">Phòng khám của chúng tôi cung cấp nhiều dịch vụ y tế chất lượng cao với đội ngũ bác sĩ chuyên môn và trang thiết bị hiện đại.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {services.map((service, index) => (
+                    {departmentData.map((item, index) => (
                         <div key={index} className="bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-start">
-                            <img src={assets.icon3} className="bg-blue-50 ml-3 rounded-full w-20 h-20 mt-5 mb-4" alt="" />
+                            <img src={item.iconImage} className="bg-blue-50 ml-3 rounded-full w-20 h-20 mt-5 mb-4" alt="" />
                             <div className="p-4">
-                                <h3 className="text-xl font-semibold text-gray-800 mb-2">{service.title}</h3>
-                                <p className="text-gray-600">{service.description}</p>
+                                <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.name}</h3>
+                                <p className="text-gray-600">{item.description}</p>
                                 <a href="#" className="mt-4 inline-block text-blue-600 font-medium hover:text-blue-700">
                                     Chi tiết →
                                 </a>
