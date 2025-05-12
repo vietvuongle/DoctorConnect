@@ -123,7 +123,7 @@ export function Departments() {
                     {isAddingNew && (
                         <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold text-gray-800">Thêm khoa mới</h2>
+                                <h2 className="text-lg font-medium text-gray-800">Thêm khoa mới</h2>
                                 <button
                                     onClick={() => {
                                         setIsAddingNew(false);
@@ -134,7 +134,7 @@ export function Departments() {
                                     <CloseIcon className="h-5 w-5" />
                                 </button>
                             </div>
-                            <form onSubmit={onSubmitHandler} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <form onSubmit={onSubmitHandler} className="grid grid-cols-1 gap-4">
                                 <div className="col-span-1">
                                     <div className="flex items-center gap-4 mb-4 text-gray-500">
                                         <label htmlFor="doc-img" className="cursor-pointer">

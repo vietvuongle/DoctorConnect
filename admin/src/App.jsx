@@ -11,6 +11,11 @@ import Home from "./pages/admin/Home";
 import AddDoctor from "./pages/admin/AddDoctor";
 import { Departments } from "./pages/admin/Departments";
 import ListDoctor from "./pages/admin/ListDoctor";
+import Dashboard from "./pages/doctor/DashBoard";
+import AdminDashboard from "./pages/Test";
+import Schedule from "./pages/admin/Schedule";
+import Patient from "./pages/admin/Patient";
+import Setting from "./pages/admin/Setting";
 
 function App() {
     const { aToken } = useContext(AdminContext);
@@ -27,13 +32,23 @@ function App() {
                     <Route path="/admin/add-doctor" element={<AddDoctor />} />
                     <Route path="/admin/department" element={<Departments />} />
                     <Route path="/admin/list-doctor" element={<ListDoctor />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/schedule" element={<Schedule />} />
+                    <Route path="/admin/patient" element={<Patient />} />
+                    <Route path="/admin/setting" element={<Setting />} />
+
+                    {/* Doctor */}
+
+                    <Route path="/doctor/dashboard" element={<Dashboard />} />
                 </Routes>
             </div>
         </div>
     ) : (
         <>
-            <Login />
             <ToastContainer />
+            <Routes>
+                <Route path="/login" element={<Login />} />
+            </Routes>
         </>
     );
 }
