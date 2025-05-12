@@ -21,13 +21,16 @@ const MyProfile = () => {
       const { data } = await axios.get(backendUrl + "/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUserProfile(data);
-      setName(data.name || "");
-      setPhone(data.phone || "");
-      setDob(data.dob || "");
-      setGender(data.gender || "");
-      setAddress(data.address || "");
-      setImagePreview(data.image || ""); // Set the image URL for preview
+
+      const userData = data.result; // Lấy data.result thay vì data
+
+      setUserProfile(userData);
+      setName(userData.name || "");
+      setPhone(userData.phone || "");
+      setDob(userData.dob || "");
+      setGender(userData.gender || "");
+      setAddress(userData.address || "");
+      setImagePreview(userData.image || ""); // Nếu có trường image thì sẽ hiện
     } catch (error) {
       console.error("Lỗi khi gọi API user profile:", error.message);
     }
@@ -62,11 +65,31 @@ const MyProfile = () => {
   };
 
   // Handle image upload
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
       setImagePreview(URL.createObjectURL(file)); // Preview the image
+
+      // Upload image to the server (Cloudinary or similar service)
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const uploadResponse = await axios.post(backendUrl + "/api/user/uploadImage", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // Get the image URL returned from the server (Cloudinary)
+        const uploadedImageUrl = uploadResponse.data; 
+        setImagePreview(uploadedImageUrl); // Set the image preview with the URL from Cloudinary
+        console.log("Uploaded image URL:", uploadedImageUrl);
+      } catch (error) {
+        console.error("Lỗi khi tải ảnh lên:", error.message);
+        alert("Có lỗi xảy ra khi tải ảnh lên.");
+      }
     }
   };
 
@@ -84,7 +107,7 @@ const MyProfile = () => {
 
           <form onSubmit={handleUpdateProfile} className="space-y-4">
 
-               {/* Avatar Display */}
+            {/* Avatar Display */}
             <div>
               <label className="text-gray-600 text-sm">Ảnh đại diện</label>
               <div className="mb-4">
@@ -106,6 +129,8 @@ const MyProfile = () => {
                 className="w-full bg-gray-100 p-2 rounded border border-gray-300"
               />
             </div>
+
+            {/* Name */}
             <div>
               <label className="text-gray-600 text-sm">Họ và tên</label>
               <input
@@ -116,6 +141,7 @@ const MyProfile = () => {
               />
             </div>
 
+            {/* Email */}
             <div>
               <label className="text-gray-600 text-sm">Email</label>
               <input
@@ -126,6 +152,7 @@ const MyProfile = () => {
               />
             </div>
 
+            {/* Phone */}
             <div>
               <label className="text-gray-600 text-sm">Số điện thoại</label>
               <input
@@ -136,6 +163,7 @@ const MyProfile = () => {
               />
             </div>
 
+            {/* Date of Birth */}
             <div>
               <label className="text-gray-600 text-sm">Ngày sinh</label>
               <input
@@ -146,6 +174,7 @@ const MyProfile = () => {
               />
             </div>
 
+            {/* Gender */}
             <div>
               <label className="text-gray-600 text-sm">Giới tính</label>
               <input
@@ -156,6 +185,7 @@ const MyProfile = () => {
               />
             </div>
 
+            {/* Address */}
             <div>
               <label className="text-gray-600 text-sm">Địa chỉ</label>
               <textarea
@@ -165,8 +195,6 @@ const MyProfile = () => {
                 className="w-full bg-gray-100 p-2 rounded border border-gray-300"
               />
             </div>
-
-         
 
             <div className="mt-4">
               <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
