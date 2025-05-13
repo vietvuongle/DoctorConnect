@@ -28,6 +28,7 @@ function App() {
           <Route path='/admin/trangchu' element={<Home/>} />
           <Route path='/admin/thembacsi' element={<AddDoctor/>} />
           <Route path='/admin/khoa' element={<Departments/>} />
+          
         </Routes>
       </div>
     </div>
