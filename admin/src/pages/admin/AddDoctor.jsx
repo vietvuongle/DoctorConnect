@@ -11,14 +11,7 @@ const AddDoctor = () => {
     const [docImg, setDocImg] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [experience, setExperience] = useState("1 năm");
-    const [fees, setFees] = useState("");
-    const [about, setAbout] = useState("");
-    const [speciality, setSpeciality] = useState("Khoa mắt");
-    const [degree, setDegree] = useState("");
-    const [address, setAddress] = useState("");
-    const [phone, setPhone] = useState("");
+
     const [sex, setSex] = useState("");
     const [school, setSchool] = useState("");
 
@@ -27,61 +20,6 @@ const AddDoctor = () => {
     const onSubmitHandler = async (e) => {
         e.preventDefault();
 
-        try {
-            if (!docImg) {
-                toast.error("Vui lòng chọn ảnh");
-            }
-
-            const cleanedFees = fees.replace(/\./g, "");
-
-            const formData = new FormData();
-            formData.append("image", docImg);
-            formData.append("name", name);
-            formData.append("email", email);
-            formData.append("password", password);
-            formData.append("experience", experience);
-            formData.append("fees", cleanedFees);
-            formData.append("about", about);
-            formData.append("speciality", speciality);
-            formData.append("degree", degree);
-            formData.append("address", address);
-            formData.append("phone", phone);
-            formData.append("school", school);
-            formData.append("sex", sex);
-
-            formData.forEach((value, key) => {
-                console.log(`${key}:`, value);
-            });
-
-            const { data } = await axios.post(backendUrl + "/api/admin/add-doctor", formData, { headers: { aToken } });
-
-            if (data !== false) {
-                toast.success("Thêm bác sĩ thành công");
-                setDocImg(false);
-                setName("");
-                setEmail("");
-                setPassword("");
-                setExperience("1 Năm");
-                setFees("");
-                setAbout("");
-                setPhone("");
-                setSex("Nam");
-                setSpeciality("Da liễu");
-                setDegree("");
-                setAddress("");
-                setSchool("");
-            } else {
-                toast.error("Thêm bác sĩ thất bại!");
-            }
-        } catch (error) {}
-    };
-
-    const handleFeesChange = (e) => {
-        const rawValue = e.target.value.replace(/\./g, ""); // Xoá dấu chấm
-        if (!/^\d*$/.test(rawValue)) return; // Ngăn nhập ký tự không phải số
-
-        const formatted = Number(rawValue).toLocaleString("vi-VN");
-        setFees(formatted);
     };
 
     return (
@@ -149,6 +87,14 @@ const AddDoctor = () => {
                                 </div>
                             </div>
 
+
+
+
+
+
+
+
+
                             <div className="w-full lg:flex-1 flex flex-col gap-4">
                                 <div className="flex-1 flex flex-col gap-1">
                                     <p>Chuyên ngành</p>
@@ -166,10 +112,18 @@ const AddDoctor = () => {
                                     <input onChange={(e) => setDegree(e.target.value)} value={degree} className="border rounded px-3 py-2" type="text" placeholder="Học vấn" required />
                                 </div>
 
+
                                 <div className="flex-1 flex flex-col gap-1">
                                     <p>Trường Tốt Nghiệp</p>
                                     <input onChange={(e) => setSchool(e.target.value)} value={school} className="border rounded px-3 py-2" type="text" placeholder="Trường tốt nghiệp" required />
                                 </div>
+
+
+
+
+
+
+
 
                                 <div className="flex-1 flex flex-col gap-1">
                                     <p>Địa Chỉ</p>
@@ -281,6 +235,10 @@ const AddDoctor = () => {
                         </div>
                     </div>
                 </div>
+
+
+
+
             </div>
         </div>
     );
