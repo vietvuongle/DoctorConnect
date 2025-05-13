@@ -3,64 +3,67 @@ import { Search as SearchIcon, Filter as FilterIcon, Star as StarIcon, Calendar 
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { AppContext } from "../context/AppContext";
+import { Link } from "react-router-dom";
+
+
 export function Doctors() {
     const { departmentData } = useContext(AppContext);
     const { doctorData } = useContext(AppContext);
 
     const specialties = ["Tất cả chuyên khoa", "Tim mạch", "Nhi khoa", "Thần kinh", "Nội khoa", "Da liễu", "Mắt", "Tai Mũi Họng", "Cột sống"];
     const doctors = [
-        {
-            id: 1,
-            name: "BS. Nguyễn Văn A",
-            specialty: "Tim mạch",
-            image: "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-            experience: "15 năm kinh nghiệm",
-            rating: 4.9,
-            reviewCount: 124,
-            education: "Đại học Y Hà Nội",
-            certifications: ["Chứng chỉ Tim mạch Hoa Kỳ", "Thành viên Hội Tim mạch Việt Nam"],
-            languages: ["Tiếng Việt", "Tiếng Anh"],
-            nextAvailable: "Hôm nay, 14:00",
-        },
-        {
-            id: 2,
-            name: "BS. Trần Thị B",
-            specialty: "Nhi khoa",
-            image: "https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827776.jpg",
-            experience: "10 năm kinh nghiệm",
-            rating: 4.8,
-            reviewCount: 98,
-            education: "Đại học Y Dược TP.HCM",
-            certifications: ["Chuyên khoa Nhi", "Thành viên Hội Nhi khoa Việt Nam"],
-            languages: ["Tiếng Việt", "Tiếng Anh", "Tiếng Pháp"],
-            nextAvailable: "Mai, 09:30",
-        },
-        {
-            id: 3,
-            name: "BS. Lê Văn C",
-            specialty: "Thần kinh",
-            image: "https://img.freepik.com/free-photo/portrait-smiling-handsome-male-doctor-man_171337-5055.jpg",
-            experience: "12 năm kinh nghiệm",
-            rating: 4.7,
-            reviewCount: 156,
-            education: "Đại học Y Huế",
-            certifications: ["Chuyên khoa Thần kinh", "Nghiên cứu sinh tại Đức"],
-            languages: ["Tiếng Việt", "Tiếng Anh", "Tiếng Đức"],
-            nextAvailable: "Hôm nay, 16:30",
-        },
-        {
-            id: 4,
-            name: "BS. Phạm Thị D",
-            specialty: "Nội khoa",
-            image: "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
-            experience: "8 năm kinh nghiệm",
-            rating: 4.9,
-            reviewCount: 87,
-            education: "Đại học Y Dược TP.HCM",
-            certifications: ["Chuyên khoa Nội", "Tu nghiệp tại Singapore"],
-            languages: ["Tiếng Việt", "Tiếng Anh"],
-            nextAvailable: "Mai, 11:00",
-        },
+        // {
+        //     id: 1,
+        //     name: "BS. Nguyễn Văn A",
+        //     specialty: "Tim mạch",
+        //     image: "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
+        //     experience: "15 năm kinh nghiệm",
+        //     rating: 4.9,
+        //     reviewCount: 124,
+        //     education: "Đại học Y Hà Nội",
+        //     certifications: ["Chứng chỉ Tim mạch Hoa Kỳ", "Thành viên Hội Tim mạch Việt Nam"],
+        //     languages: ["Tiếng Việt", "Tiếng Anh"],
+        //     nextAvailable: "Hôm nay, 14:00",
+        // },
+        // {
+        //     id: 2,
+        //     name: "BS. Trần Thị B",
+        //     specialty: "Nhi khoa",
+        //     image: "https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827776.jpg",
+        //     experience: "10 năm kinh nghiệm",
+        //     rating: 4.8,
+        //     reviewCount: 98,
+        //     education: "Đại học Y Dược TP.HCM",
+        //     certifications: ["Chuyên khoa Nhi", "Thành viên Hội Nhi khoa Việt Nam"],
+        //     languages: ["Tiếng Việt", "Tiếng Anh", "Tiếng Pháp"],
+        //     nextAvailable: "Mai, 09:30",
+        // },
+        // {
+        //     id: 3,
+        //     name: "BS. Lê Văn C",
+        //     specialty: "Thần kinh",
+        //     image: "https://img.freepik.com/free-photo/portrait-smiling-handsome-male-doctor-man_171337-5055.jpg",
+        //     experience: "12 năm kinh nghiệm",
+        //     rating: 4.7,
+        //     reviewCount: 156,
+        //     education: "Đại học Y Huế",
+        //     certifications: ["Chuyên khoa Thần kinh", "Nghiên cứu sinh tại Đức"],
+        //     languages: ["Tiếng Việt", "Tiếng Anh", "Tiếng Đức"],
+        //     nextAvailable: "Hôm nay, 16:30",
+        // },
+        // {
+        //     id: 4,
+        //     name: "BS. Phạm Thị D",
+        //     specialty: "Nội khoa",
+        //     image: "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
+        //     experience: "8 năm kinh nghiệm",
+        //     rating: 4.9,
+        //     reviewCount: 87,
+        //     education: "Đại học Y Dược TP.HCM",
+        //     certifications: ["Chuyên khoa Nội", "Tu nghiệp tại Singapore"],
+        //     languages: ["Tiếng Việt", "Tiếng Anh"],
+        //     nextAvailable: "Mai, 11:00",
+        // },
     ];
 
     const [selectedSpecialty, setSelectedSpecialty] = useState("Tất cả chuyên khoa");
@@ -128,8 +131,11 @@ export function Doctors() {
                                     <div className="md:w-2/3 p-6">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
-                                                <h2 className="text-xl font-semibold text-gray-800">Bác Sĩ: {doctor.name}</h2>
+                                                {/* <Link to={`/doctor/${doctor.id}`}> */}
+                                                <h2 className="text-xl font-semibold text-gray-800 hover:underline">Bác Sĩ: {doctor.name}</h2>
+                                                {/* </Link> */}
                                                 <p className="text-blue-600">{doctor.speciality}</p>
+
                                             </div>
                                             <div className="flex items-center">
                                                 <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
@@ -150,7 +156,9 @@ export function Doctors() {
                                                 <CalendarIcon className="h-5 w-5 mr-1" />
                                                 <span className="text-sm">Lịch trống: {doctor.nextAvailable}</span>
                                             </div>
-                                            <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">Đặt lịch khám</button>
+                                            <Link to={`/doctor/${doctor.id}`}>
+                                                <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">Đặt lịch khám</button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>

@@ -14,8 +14,8 @@ const AppContextProvider = (props) => {
 
     const [doctorData, setDoctorData] = useState([]);
 
-    
-    
+
+
     const getDepartment = async () => {
         try {
             const { data } = await axios.get(backendUrl + "/api/admin/all-department");
