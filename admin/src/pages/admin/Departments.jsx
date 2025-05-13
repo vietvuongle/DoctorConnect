@@ -6,81 +6,78 @@ import { AdminContext } from "../../context/AdminContext";
 import axios from "axios";
 
 export function Departments() {
-    const [departments, setDepartments] = useState([
-        {
-            id: 1,
-            name: "Tim mạch",
-            description: "Chuyên khoa về bệnh lý tim mạch và tuần hoàn",
-            icon: "heart",
-            active: true,
-        },
-        {
-            id: 2,
-            name: "Nhi khoa",
-            description: "Chăm sóc sức khỏe trẻ em từ sơ sinh đến 15 tuổi",
-            icon: "baby",
-            active: true,
-        },
-        {
-            id: 3,
-            name: "Thần kinh",
-            description: "Điều trị các bệnh lý về hệ thần kinh",
-            icon: "brain",
-            active: true,
-        },
-    ]);
+    const { backendUrl, aToken, departmentData, getDepartment } = useContext(AdminContext);
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [iconImage, setIconImage] = useState(false);
-    const { backendUrl, aToken } = useContext(AdminContext);
 
     const [isAddingNew, setIsAddingNew] = useState(false);
-    const [editingId, setEditingId] = useState(null);
-    const [formError, setFormError] = useState("");
-    const [newDepartment, setNewDepartment] = useState({
-        name: "",
-        description: "",
-        icon: "",
-        active: true,
-    });
 
-    const handleAddNew = () => {
-        if (!newDepartment.name || !newDepartment.description) {
-            setFormError("Vui lòng điền đầy đủ thông tin");
-            return;
-        }
-        setDepartments((prev) => [
-            ...prev,
-            {
-                ...newDepartment,
-                id: Math.max(...prev.map((d) => d.id), 0) + 1,
-            },
-        ]);
-        setIsAddingNew(false);
-        setNewDepartment({
-            name: "",
-            description: "",
-            icon: "",
-            active: true,
+    const [editingDepartment, setEditingIdDepartment] = useState(null);
+    const [editForm, setEditForm] = useState({ name: "", description: "", iconImage: null });
+
+    const handleStartEdit = (department) => {
+        setEditingIdDepartment(department.id);
+        setEditForm({
+            name: department.name,
+            description: department.description,
+            iconImage: null, // không có ảnh mới, mặc định null
         });
-        setFormError("");
     };
 
-    const handleEdit = (dept) => {
-        const updatedDepartments = departments.map((d) => (d.id === dept.id ? { ...dept } : d));
-        setDepartments(updatedDepartments);
-        setEditingId(null);
-    };
+    const handleStartDelete = async (departmentId) => {
+        try {
+            const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa khoa này?");
+            if (confirmDelete) {
+                const { data } = await axios.delete(backendUrl + `/api/admin/delete-department/${departmentId}`, {
+                    headers: { aToken },
+                });
 
-    const handleDelete = (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa khoa này?")) {
-            setDepartments((prev) => prev.filter((dept) => dept.id !== id));
+                if (data !== false) {
+                    toast.success("Xóa khoa thành công");
+                    getDepartment(); // Tải lại danh sách khoa
+                } else {
+                    toast.error("Xóa khoa thất bại");
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Có lỗi xảy ra khi xóa khoa");
         }
     };
 
-    const handleToggleStatus = (id) => {
-        setDepartments((prev) => prev.map((dept) => (dept.id === id ? { ...dept, active: !dept.active } : dept)));
+    const handleImageChange = (e) => {
+        setEditForm((prev) => ({ ...prev, iconImage: e.target.files[0] }));
+    };
+
+    const handleUpdate = async (department) => {
+        try {
+            const formData = new FormData();
+            formData.append("id", department.id); // gửi id để backend biết record nào cần update
+            formData.append("name", editForm.name);
+            formData.append("description", editForm.description);
+            if (editForm.iconImage) {
+                formData.append("iconImage", editForm.iconImage);
+            }
+
+            const { data } = await axios.post(backendUrl + "/api/admin/update-department", formData, {
+                headers: { aToken },
+            });
+
+            if (data !== null) {
+                toast.success("Cập nhật khoa thành công");
+
+                // gọi lại API để load lại danh sách khoa
+                getDepartment();
+                setEditingIdDepartment(null);
+            } else {
+                toast.error("Có lỗi đã xảy ra");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Có lỗi xảy ra");
+        }
     };
 
     const onSubmitHandler = async (e) => {
@@ -102,6 +99,7 @@ export function Departments() {
                 setIconImage(false);
                 setName("");
                 setDescription("");
+                getDepartment();
             } else {
                 toast.error("Thêm khoa thất bại");
             }
@@ -109,14 +107,12 @@ export function Departments() {
     };
 
     return (
-        <div className="py-8 bg-gray-50 min-h-screen">
-            <div className="container mx-auto px-4">
-                <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="py-8 bg-gray-50 w-full px-4">
+            <div className="max-w-7xl mx-auto">
+                <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-800">Quản lý khoa</h1>
-                        </div>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <h1 className="text-2xl font-bold text-gray-800">Quản lý khoa</h1>
                         <button onClick={() => setIsAddingNew(true)} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center" disabled={isAddingNew}>
                             <PlusIcon className="h-5 w-5 mr-2" />
                             Thêm khoa mới
@@ -127,7 +123,7 @@ export function Departments() {
                     {isAddingNew && (
                         <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold text-gray-800">Thêm khoa mới</h2>
+                                <h2 className="text-lg font-medium text-gray-800">Thêm khoa mới</h2>
                                 <button
                                     onClick={() => {
                                         setIsAddingNew(false);
@@ -139,27 +135,29 @@ export function Departments() {
                                 </button>
                             </div>
                             <form onSubmit={onSubmitHandler} className="grid grid-cols-1 gap-4">
-                                <div>
-                                    <div className="flex items-center gap-4 mb-8 text-gray-500">
-                                        <label htmlFor="doc-img">
-                                            <img className="w-16 bg-gray-100  rounded-full cursor-pointer" src={iconImage ? URL.createObjectURL(iconImage) : assets.upload_area} alt="" />
+                                <div className="col-span-1">
+                                    <div className="flex items-center gap-4 mb-4 text-gray-500">
+                                        <label htmlFor="doc-img" className="cursor-pointer">
+                                            <img className="w-16 h-16 bg-gray-100 rounded-full object-cover" src={iconImage ? URL.createObjectURL(iconImage) : assets.upload_area} alt="Upload Icon" />
                                         </label>
                                         <input onChange={(e) => setIconImage(e.target.files[0])} type="file" id="doc-img" hidden />
-                                        <p>
-                                            Upload <br /> Icon{" "}
+                                        <p className="text-sm leading-tight">
+                                            Upload
+                                            <br />
+                                            Icon
                                         </p>
                                     </div>
-
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Tên khoa</label>
                                     <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên khoa" />
                                 </div>
-                                <div>
+
+                                <div className="col-span-1">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập mô tả về khoa" />
+                                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập mô tả về khoa" />
                                 </div>
 
-                                <div className="flex justify-end">
-                                    <button type="submit" onClick={handleAddNew} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                                <div className="col-span-full flex justify-end">
+                                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
                                         <SaveIcon className="h-5 w-5 mr-2" />
                                         Lưu
                                     </button>
@@ -173,80 +171,55 @@ export function Departments() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên khoa</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên khoa</th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Mô tả</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {departments.map((department) => (
+                                {departmentData.map((department) => (
                                     <tr key={department.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            {editingId === department.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={department.name}
-                                                    onChange={(e) => {
-                                                        const updated = departments.map((d) =>
-                                                            d.id === department.id
-                                                                ? {
-                                                                      ...d,
-                                                                      name: e.target.value,
-                                                                  }
-                                                                : d
-                                                        );
-                                                        setDepartments(updated);
-                                                    }}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                />
+                                        <td className="px-4 py-4">
+                                            {editingDepartment === department.id ? (
+                                                <label className="cursor-pointer">
+                                                    <img className="w-16 h-16 rounded-full object-cover" src={editForm.iconImage ? URL.createObjectURL(editForm.iconImage) : department.iconImage} alt="" />
+                                                    <input type="file" onChange={handleImageChange} className="hidden" />
+                                                </label>
+                                            ) : (
+                                                <img className="w-16 h-16 rounded-full object-cover" src={department.iconImage} alt="" />
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            {editingDepartment === department.id ? (
+                                                <input type="text" value={editForm.name} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                             ) : (
                                                 <div className="text-sm font-medium text-gray-900">{department.name}</div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            {editingId === department.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={department.description}
-                                                    onChange={(e) => {
-                                                        const updated = departments.map((d) =>
-                                                            d.id === department.id
-                                                                ? {
-                                                                      ...d,
-                                                                      description: e.target.value,
-                                                                  }
-                                                                : d
-                                                        );
-                                                        setDepartments(updated);
-                                                    }}
-                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                />
+                                        <td className="px-4 py-4">
+                                            {editingDepartment === department.id ? (
+                                                <input type="text" value={editForm.description} onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                             ) : (
-                                                <div className="text-sm text-gray-500">{department.description}</div>
+                                                <div className="text-sm text-gray-500 w-full sm:w-auto break-words">{department.description}</div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button onClick={() => handleToggleStatus(department.id)} className={`px-3 py-1 rounded-full text-xs font-medium ${department.active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                                {department.active ? "Đang hoạt động" : "Ngừng hoạt động"}
-                                            </button>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            {editingId === department.id ? (
+                                        <td className="px-4 py-4 text-right whitespace-nowrap">
+                                            {editingDepartment === department.id ? (
                                                 <div className="flex justify-end space-x-2">
-                                                    <button onClick={() => handleEdit(department)} className="text-green-600 hover:text-green-900">
+                                                    <button onClick={() => handleUpdate(department)} className="text-green-600 hover:text-green-900">
                                                         <SaveIcon className="h-5 w-5" />
                                                     </button>
-                                                    <button onClick={() => setEditingId(null)} className="text-gray-600 hover:text-gray-900">
+                                                    <button onClick={() => setEditingIdDepartment(null)} className="text-gray-600 hover:text-gray-900">
                                                         <CloseIcon className="h-5 w-5" />
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button onClick={() => setEditingId(department.id)} className="text-blue-600 hover:text-blue-900">
+                                                <div className="flex justify-end space-x-3">
+                                                    <button onClick={() => handleStartEdit(department)} className="text-blue-600 hover:text-blue-900">
                                                         <PencilIcon className="h-5 w-5" />
                                                     </button>
-                                                    <button onClick={() => handleDelete(department.id)} className="text-red-600 hover:text-red-900">
+                                                    <button onClick={() => handleStartDelete(department.id)} className="text-red-600 hover:text-red-900">
                                                         <TrashIcon className="h-5 w-5" />
                                                     </button>
                                                 </div>
