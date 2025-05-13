@@ -6,9 +6,10 @@ export const AdminContext = createContext();
 
 const AdminContextProvider = (props) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
-    const [aToken, setAToken] = useState(localStorage.getItem("aToken") ? localStorage.getItem("aToken") : "");
+    const [aToken, setAToken] = useState(localStorage.getItem("aToken") ? localStorage.getItem("aToken") : false);
     const [departmentData, setDepartmentData] = useState([]);
     const [doctorData, setDoctorData] = useState([]);
+    const [appointmentData, setAppointmentData] = useState([]);
 
     const getDoctorData = async () => {
         try {
@@ -26,10 +27,26 @@ const AdminContextProvider = (props) => {
 
     const getDepartment = async () => {
         try {
-            const { data } = await axios.get(backendUrl + "/api/admin/all-department", { headers: { aToken } });
+            const { data } = await axios.get(backendUrl + "/api/admin/all-department");
 
             if (data !== false) {
                 setDepartmentData(data.result);
+            } else {
+                toast.error("Đã xảy ra lỗi");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const getAllAppointment = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/admin/all-appointment", { headers: { Authorization: `Bearer ${aToken}` } });
+
+            console.log("data", data);
+
+            if (data !== false) {
+                setAppointmentData(data.result);
             } else {
                 toast.error("Error");
             }
@@ -45,12 +62,16 @@ const AdminContextProvider = (props) => {
         departmentData,
         setDepartmentData,
         doctorData,
+        appointmentData,
         getDepartment,
     };
 
     useEffect(() => {
-        getDepartment();
-        getDoctorData();
+        if (aToken) {
+            getDepartment();
+            getDoctorData();
+            getAllAppointment();
+        }
     }, []);
 
     return <AdminContext.Provider value={value}>{props.children}</AdminContext.Provider>;

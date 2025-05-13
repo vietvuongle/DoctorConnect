@@ -9,15 +9,13 @@ export function HeroSection() {
 
     const getUserProfile = async () => {
         try {
-            console.log("token: ", token);
-
-            const { data } = await axios.get(backendUrl + "/api/user/profile", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const url = backendUrl + "/api/user/profile";
+            let headers = {
+                Authorization: "Bearer " + token,
+            };
+            const { data } = await axios.get(url, {
+                headers: headers,
             });
-
-            console.log(data.result);
 
             if (data !== null) {
                 localStorage.setItem("userId", data.result._id);
@@ -30,7 +28,9 @@ export function HeroSection() {
     };
 
     useEffect(() => {
-        getUserProfile();
+        if (token) {
+            getUserProfile();
+        }
     }, []);
 
     return (

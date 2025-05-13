@@ -4,7 +4,7 @@ import { CalendarIcon, ClockIcon, UserIcon, FileTextIcon, BellIcon, SettingsIcon
 import { useContext } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
 const Dashboard = () => {
-    const { setDToken } = useContext(DoctorContext);
+    const { setDToken, doctorUser } = useContext(DoctorContext);
 
     const [activeTab, setActiveTab] = useState("appointments");
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -99,10 +99,12 @@ const Dashboard = () => {
                         <div className="bg-white rounded-lg shadow overflow-hidden">
                             <div className="p-6 bg-blue-600 text-white">
                                 <div className="flex items-center">
-                                    <div className="w-16 h-16 rounded-full bg-white text-blue-600 flex items-center justify-center text-2xl font-bold">BS</div>
+                                    <div className="text-blue-600 flex items-center justify-center text-2xl font-bold">
+                                        <img className="w-16 h-16 rounded-full" src={doctorUser.image} alt="" />
+                                    </div>
                                     <div className="ml-4">
-                                        <h2 className="text-lg font-semibold">BS. Nguyễn Văn A</h2>
-                                        <p className="text-blue-200">Chuyên khoa Tim mạch</p>
+                                        <h2 className="text-lg font-semibold">BS. {doctorUser.name}</h2>
+                                        <p className="text-blue-200">{doctorUser.speciality}</p>
                                     </div>
                                 </div>
                             </div>

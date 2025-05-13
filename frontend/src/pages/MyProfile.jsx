@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
 
 const MyProfile = () => {
     const { token, backendUrl } = useContext(AppContext);
@@ -10,15 +8,11 @@ const MyProfile = () => {
 
     const getUserProfile = async () => {
         try {
-            console.log("token: ", token);
-
             const { data } = await axios.get(backendUrl + "/api/user/profile", {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-
-            console.log(data);
 
             if (data !== null) {
                 setUserProfile(data.result);

@@ -31,7 +31,7 @@ export function Departments() {
             const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa khoa này?");
             if (confirmDelete) {
                 const { data } = await axios.delete(backendUrl + `/api/admin/delete-department/${departmentId}`, {
-                    headers: { aToken },
+                    Authorization: "Bearer " + aToken,
                 });
 
                 if (data !== false) {
@@ -62,7 +62,9 @@ export function Departments() {
             }
 
             const { data } = await axios.post(backendUrl + "/api/admin/update-department", formData, {
-                headers: { aToken },
+                headers: {
+                    Authorization: `Bearer ${aToken}`,
+                },
             });
 
             if (data !== null) {

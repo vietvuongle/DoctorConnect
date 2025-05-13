@@ -16,6 +16,16 @@ const AppContextProvider = (props) => {
 
     const getDepartment = async () => {
         try {
+            // const url = backendUrl + "/api/admin/all-department";
+
+            // let headers = {
+            //     Authorization: "Bearer " + token,
+            // };
+
+            // const { data } = await axios.get(url, {
+            //     headers: headers,
+            // });
+
             const { data } = await axios.get(backendUrl + "/api/admin/all-department");
 
             if (data !== false) {
@@ -30,6 +40,14 @@ const AppContextProvider = (props) => {
 
     const getDoctorData = async () => {
         try {
+            // const url = backendUrl + "/api/admin/all-doctor";
+            // let headers = {
+            //     Authorization: "Bearer " + token,
+            // };
+            // const { data } = await axios.get(url, {
+            //     headers: headers,
+            // });
+
             const { data } = await axios.get(backendUrl + "/api/admin/all-doctor");
 
             if (data !== false) {

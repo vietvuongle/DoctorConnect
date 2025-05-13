@@ -8,6 +8,7 @@ import { AdminContext } from "./context/AdminContext";
 import { DoctorContext } from "./context/DoctorContext";
 import Login from "./pages/Login";
 import Home from "./pages/admin/Home";
+import HomeDoctor from "./pages/doctor/Home";
 import AddDoctor from "./pages/admin/AddDoctor";
 import { Departments } from "./pages/admin/Departments";
 import ListDoctor from "./pages/admin/ListDoctor";
@@ -28,7 +29,7 @@ function App() {
             <div className="flex items-start">
                 <Sidebar />
                 <Routes>
-                    <Route path="/admin/home" element={<Home />} />
+                    <Route path="/" element={<Home />} />
                     <Route path="/admin/add-doctor" element={<AddDoctor />} />
                     <Route path="/admin/department" element={<Departments />} />
                     <Route path="/admin/list-doctor" element={<ListDoctor />} />
@@ -40,6 +41,7 @@ function App() {
                     {/* Doctor */}
 
                     <Route path="/doctor/dashboard" element={<Dashboard />} />
+                    <Route path="/doctor/home" element={<HomeDoctor />} />
                 </Routes>
             </div>
         </div>

@@ -1,6 +1,26 @@
 import React from "react";
+import { AdminContext } from "../../context/AdminContext";
+import { useContext } from "react";
 
 const Schedule = () => {
+    const { appointmentData, doctorData } = useContext(AdminContext);
+    let count = 0;
+
+    const renderStatusBadge = (status) => {
+        switch (status) {
+            case "confirmed":
+                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã xác nhận</span>;
+            case "pending":
+                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Chờ xác nhận</span>;
+            case "completed":
+                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Hoàn thành</span>;
+            case "cancelled":
+                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Đã hủy</span>;
+            default:
+                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{status}</span>;
+        }
+    };
+
     return (
         <div className="w-full m-5">
             <div>
@@ -24,19 +44,19 @@ const Schedule = () => {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        ID
+                                        STT
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Bệnh nhân
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Liên hệ
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Bác sĩ
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Dịch vụ
-                                    </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Ngày giờ
+                                        Ngày khám
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Trạng thái
@@ -47,21 +67,22 @@ const Schedule = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {/* {recentAppointments.map((appointment) => (
-                                    <tr key={appointment.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{appointment.id}</td>
+                                {appointmentData.map((appointment) => (
+                                    <tr key={appointment._id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{count + 1}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{appointment.patient}</div>
+                                            <div className="text-sm text-gray-900">{appointment.patientName}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{appointment.doctor}</div>
+                                            <div className="text-sm font-medium text-gray-900">{doctorData.find((doc) => doc.id === appointment.doctorId) ? doctorData.find((doc) => doc.id === appointment.doctorId).name : "Không tìm thấy bác sĩ"}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{appointment.service}</div>
+                                            <div className="text-sm text-gray-900">{appointment.email}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{appointment.date}</div>
+                                            <div className="text-sm text-gray-900">{appointment.slotDate}</div>
                                         </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(appointment.status)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button className="text-blue-600 hover:text-blue-900 mr-3">Xem</button>
@@ -69,7 +90,7 @@ const Schedule = () => {
                                             <button className="text-red-600 hover:text-red-900">Hủy</button>
                                         </td>
                                     </tr>
-                                ))} */}
+                                ))}
                             </tbody>
                         </table>
                     </div>

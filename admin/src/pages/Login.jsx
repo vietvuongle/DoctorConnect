@@ -25,7 +25,7 @@ const Login = () => {
                     const token = data.result.token;
                     localStorage.setItem("aToken", token);
                     setAToken(token);
-                    navigate("/admin/home");
+                    navigate("/");
                 } else {
                     toast.error(data.message);
                 }

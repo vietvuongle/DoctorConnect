@@ -15,7 +15,7 @@ const steps = [
 export function BookingPage() {
     const { departmentData, doctorData, backendUrl, token } = useContext(AppContext);
 
-    const userId = localStorage.getItem("userId");
+    const userId = sessionStorage.getItem("userId");
 
     const navigate = useNavigate();
 
@@ -56,7 +56,11 @@ export function BookingPage() {
             console.log([...formData]);
             console.log("Token: ", token);
 
-            const response = await axios.post(backendUrl + "/api/user/appointment", formData, { headers: { token } });
+            let headers = {
+                Authorization: "Bearer " + token,
+            };
+
+            const response = await axios.post(backendUrl + "/api/user/appointment", formData, { headers: headers });
             console.log("Response: ", response);
 
             const { code, result } = response.data;
@@ -101,13 +105,13 @@ export function BookingPage() {
                             .map((doctor) => (
                                 <button
                                     key={doctor.id}
-                                    onClick={() => (setSelectedDoctor(doctor.id.toString()), setPrice(doctor.fees))}
+                                    onClick={() => (setSelectedDoctor(doctor.id), setPrice(doctor.fees))}
                                     className={`flex items-center p-4 border rounded-lg transition-colors ${selectedDoctor === doctor.id.toString() ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"}`}
                                 >
                                     <img src={doctor.image} alt={doctor.name} className="w-20 h-20 rounded-full object-cover mr-4" />
                                     <div className="text-left">
                                         <h3 className="font-semibold text-gray-800 mb-3">{doctor.name}</h3>
-                                        <p className="text-gray-600 mb-3">{doctor.speciality}</p>
+                                        <p className="text-blue-600 mb-3">{doctor.speciality}</p>
                                         <p className="text-gray-600 mb-3">Giá: {Number(doctor.fees).toLocaleString("vi-VN")} vnđ</p>
                                     </div>
                                 </button>
