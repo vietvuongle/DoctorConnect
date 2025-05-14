@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/Test";
 import Schedule from "./pages/admin/Schedule";
 import Patient from "./pages/admin/Patient";
 import Setting from "./pages/admin/Setting";
+import DoctorDetail from "./pages/admin/DoctorDetail";
 
 function App() {
     const { aToken } = useContext(AdminContext);
@@ -30,9 +31,10 @@ function App() {
                 <Sidebar />
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/admin/add-doctor" element={<AddDoctor />} />
+                    <Route path="/admin/doctor" element={<AddDoctor />} />
+                    <Route path="/admin/doctor/:doctorId" element={<DoctorDetail />} />
                     <Route path="/admin/department" element={<Departments />} />
-                    <Route path="/admin/list-doctor" element={<ListDoctor />} />
+                    {/* <Route path="/admin/list-doctor" element={<ListDoctor />} /> */}
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/schedule" element={<Schedule />} />
                     <Route path="/admin/patient" element={<Patient />} />

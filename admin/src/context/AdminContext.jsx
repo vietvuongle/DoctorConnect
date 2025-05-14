@@ -64,14 +64,13 @@ const AdminContextProvider = (props) => {
         doctorData,
         appointmentData,
         getDepartment,
+        getDoctorData,
     };
 
     useEffect(() => {
-        if (aToken) {
-            getDepartment();
-            getDoctorData();
-            getAllAppointment();
-        }
+        getDepartment();
+        getDoctorData();
+        getAllAppointment();
     }, []);
 
     return <AdminContext.Provider value={value}>{props.children}</AdminContext.Provider>;

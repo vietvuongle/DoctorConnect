@@ -4,22 +4,6 @@ import { useContext } from "react";
 
 const Schedule = () => {
     const { appointmentData, doctorData } = useContext(AdminContext);
-    let count = 0;
-
-    const renderStatusBadge = (status) => {
-        switch (status) {
-            case "confirmed":
-                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã xác nhận</span>;
-            case "pending":
-                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Chờ xác nhận</span>;
-            case "completed":
-                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Hoàn thành</span>;
-            case "cancelled":
-                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Đã hủy</span>;
-            default:
-                return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{status}</span>;
-        }
-    };
 
     return (
         <div className="w-full m-5">
@@ -67,9 +51,9 @@ const Schedule = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {appointmentData.map((appointment) => (
+                                {appointmentData.map((appointment, index) => (
                                     <tr key={appointment._id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{count + 1}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">{appointment.patientName}</div>
                                         </td>
@@ -83,7 +67,17 @@ const Schedule = () => {
                                             <div className="text-sm text-gray-900">{appointment.slotDate}</div>
                                         </td>
 
-                                        <td className="px-6 py-4 whitespace-nowrap">{renderStatusBadge(appointment.status)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {!appointment.confirm && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-black">Chờ xác nhận</span>}
+
+                                            {appointment.cancelled && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Đã hủy</span>}
+
+                                            {!appointment.cancelled && appointment.confirm && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Đã xác nhận</span>}
+
+                                            {!appointment.cancelled && !appointment.confirm && !appointment.completed && appointment.payment && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã thanh toán</span>}
+
+                                            {!appointment.cancelled && !appointment.confirm && appointment.completed && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 text-blue-800">Hoàn thành</span>}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button className="text-blue-600 hover:text-blue-900 mr-3">Xem</button>
                                             <button className="text-blue-600 hover:text-blue-900 mr-3">Sửa</button>
