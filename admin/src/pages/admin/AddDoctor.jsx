@@ -4,9 +4,13 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { AdminContext } from "../../context/AdminContext";
 import { PlusIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AddDoctor = () => {
     const [isAddingNew, setIsAddingNew] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const navigate = useNavigate();
 
     const [docImg, setDocImg] = useState(false);
     const [name, setName] = useState("");
@@ -83,6 +87,8 @@ const AddDoctor = () => {
         const formatted = Number(rawValue).toLocaleString("vi-VN");
         setFees(formatted);
     };
+
+    const filteredDoctors = doctorData.filter((doctor) => doctor.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
         <div className="w-full">
@@ -202,7 +208,7 @@ const AddDoctor = () => {
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg leading-6 font-medium text-gray-900">Danh sách bác sĩ</h3>
                         <div>
-                            <input type="text" placeholder="Tìm kiếm bác sĩ..." className="border border-gray-300 rounded-md px-3 py-2 text-sm" />
+                            <input type="text" placeholder="Tìm kiếm bác sĩ..." className="border border-gray-300 rounded-md px-3 py-2 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         </div>
                     </div>
                 </div>
@@ -229,7 +235,7 @@ const AddDoctor = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {doctorData.map((doctor) => (
+                            {filteredDoctors.map((doctor) => (
                                 <tr key={doctor.id}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
@@ -259,8 +265,15 @@ const AddDoctor = () => {
                                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Hoạt động</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button className="text-blue-600 hover:text-blue-900 mr-3">Xem</button>
-                                        <button className="text-blue-600 hover:text-blue-900 mr-3">Sửa</button>
+                                        <button
+                                            onClick={() => {
+                                                navigate(`/admin/doctor/${doctor.id}`);
+                                                scrollTo(0, 0);
+                                            }}
+                                            className="text-blue-600 hover:text-blue-900 mr-3"
+                                        >
+                                            Xem
+                                        </button>
                                         <button className="text-red-600 hover:text-red-900">Vô hiệu</button>
                                     </td>
                                 </tr>

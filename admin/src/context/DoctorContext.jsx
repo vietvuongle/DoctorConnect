@@ -1,25 +1,49 @@
-import { createContext, useState } from "react";
+import axios from "axios";
+import { createContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
-export const DoctorContext = createContext()
+export const DoctorContext = createContext();
 
 const DoctorContextProvider = (props) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL
+  const [dToken, setDToken] = useState(localStorage.getItem("dToken") ? localStorage.getItem("dToken") : false);
 
-  const [dToken, setDToken] = useState(localStorage.getItem('dToken') ? localStorage.getItem('dToken') : '')
+  const [doctorUser, setDoctorUser] = useState({});
 
-  
+  const getdoctorByUserId = async () => {
+    try {
+      const url = backendUrl + "/api/doctor/getDoctor";
+      let headers = {
+        Authorization: "Bearer " + dToken,
+      };
+      const { data } = await axios.get(url, {
+        headers: headers,
+      });
+      if (data !== false) {
+        setDoctorUser(data.result);
+      } else {
+        toast.error("Error");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const value = {
-    dToken, setDToken,
-    backendUrl
-  }
+    dToken,
+    setDToken,
+    backendUrl,
+    doctorUser,
+  };
 
-  return (
-    <DoctorContext.Provider value={value}>
-      {props.children}
-    </DoctorContext.Provider>
-  )
-}
+  useEffect(() => {
+    if (dToken) {
+      getdoctorByUserId();
+    }
+  }, []);
 
-export default DoctorContextProvider
+  return <DoctorContext.Provider value={value}>{props.children}</DoctorContext.Provider>;
+};
+
+export default DoctorContextProvider;
