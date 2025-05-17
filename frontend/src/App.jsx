@@ -7,10 +7,11 @@ import Contact from './pages/Contact'
 import MyProfile from './pages/MyProfile'
 import MyAppointments from './pages/MyAppointments'
 import Appointment from './pages/Appointment'
+// import BookingPage from './pages/BookingPage'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Doctors } from './pages/Doctors'
-import { DoctorDetails } from './pages/DoctorDetails'
+import { DoctorDetails } from './pages/DoctorDetails';
 
 function App() {
 
@@ -18,14 +19,16 @@ function App() {
     <div className='mx-4 '>
       <ToastContainer />
       <Routes>
+        <Route path='/login' element={<Login />} />
         <Route path='/' element={<Home />} />
         <Route path='/doctors' element={<Doctors />} />
         <Route path='/doctors/:speciality' element={<Doctors />} />
-        <Route path="/doctor/:id" element={<DoctorDetails />} />
-        <Route path='/login' element={<Login />} />
         <Route path='/about' element={<About />} />
-        <Route path='/contact' element={<Contact />} />
+        {/* <Route path="/services" element={<ServicePage />} /> */}
+        <Route path="/doctor/:id" element={<DoctorDetails />} />
         <Route path='/my-profile' element={<MyProfile />} />
+        <Route path='/contact' element={<Contact />} />
+        {/* <Route path="/appointment" element={<BookingPage />} /> */}
         <Route path='/my-appointments' element={<MyAppointments />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
       </Routes>
