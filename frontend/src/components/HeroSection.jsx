@@ -50,7 +50,9 @@ export function HeroSection() {
                             <CalendarIcon className="h-5 w-5 mr-2" />
                             Đặt lịch khám ngay
                         </button>
-                        <button className="border-2 border-white text-white px-6 py-3 rounded-md font-medium hover:bg-white hover:text-blue-600 transition-colors">Tìm hiểu thêm</button>
+                        <button onClick={() => navigate("/services")} className="border-2 border-white text-white px-6 py-3 rounded-md font-medium hover:bg-white hover:text-blue-600 transition-colors">
+                            Tìm hiểu thêm
+                        </button>
                     </div>
                 </div>
                 <div className="md:w-1/2 flex justify-center">

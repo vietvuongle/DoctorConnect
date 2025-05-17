@@ -16,8 +16,11 @@ import Dashboard from "./pages/doctor/DashBoard";
 import AdminDashboard from "./pages/Test";
 import Schedule from "./pages/admin/Schedule";
 import Patient from "./pages/admin/Patient";
+import PatientOfDoctor from "./pages/doctor/Patient";
 import Setting from "./pages/admin/Setting";
 import DoctorDetail from "./pages/admin/DoctorDetail";
+import CreateMedicalRecord from "./pages/doctor/CreateMedicalRecord";
+import ViewMedicalRecord from "./pages/doctor/ViewMedicalRecord";
 
 function App() {
     const { aToken } = useContext(AdminContext);
@@ -44,6 +47,9 @@ function App() {
 
                     <Route path="/doctor/dashboard" element={<Dashboard />} />
                     <Route path="/doctor/home" element={<HomeDoctor />} />
+                    <Route path="/doctor/patient" element={<PatientOfDoctor />} />
+                    <Route path="/doctor/view-medical" element={<ViewMedicalRecord />} />
+                    <Route path="/doctor/create-medical/:userId" element={<CreateMedicalRecord />} />
                 </Routes>
             </div>
         </div>

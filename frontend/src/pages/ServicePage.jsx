@@ -14,18 +14,6 @@ export function ServicePage() {
             name: "Khám tổng quát",
             description: "Dịch vụ khám sức khỏe tổng quát toàn diện, giúp phát hiện sớm các vấn đề sức khỏe tiềm ẩn.",
             benefits: ["Phát hiện sớm bệnh lý", "Đánh giá tổng thể sức khỏe", "Tư vấn chế độ sinh hoạt", "Theo dõi định kỳ"],
-            packages: [
-                {
-                    name: "Cơ bản",
-                    price: "1.200.000đ",
-                    features: ["Khám tổng quát", "Xét nghiệm máu cơ bản", "Chụp X-quang ngực", "Điện tim"],
-                },
-                {
-                    name: "Nâng cao",
-                    price: "2.500.000đ",
-                    features: ["Tất cả gói cơ bản", "Siêu âm ổ bụng", "Xét nghiệm nước tiểu", "Đo mật độ xương", "Tư vấn dinh dưỡng"],
-                },
-            ],
             faqs: [
                 {
                     question: "Khi nào nên khám sức khỏe tổng quát?",
@@ -43,22 +31,14 @@ export function ServicePage() {
             name: "Tim mạch",
             description: "Chẩn đoán và điều trị các bệnh lý tim mạch với đội ngũ bác sĩ chuyên khoa giàu kinh nghiệm.",
             benefits: ["Tầm soát bệnh tim mạch", "Điều trị chuyên sâu", "Theo dõi liên tục", "Tư vấn phòng ngừa"],
-            packages: [
-                {
-                    name: "Tầm soát cơ bản",
-                    price: "1.500.000đ",
-                    features: ["Khám chuyên khoa tim mạch", "Điện tim", "Siêu âm tim", "Xét nghiệm máu"],
-                },
-                {
-                    name: "Chuyên sâu",
-                    price: "3.500.000đ",
-                    features: ["Tất cả gói cơ bản", "Holter điện tim 24h", "Đo huyết áp 24h", "Chụp mạch vành", "Tư vấn chuyên sâu"],
-                },
-            ],
             faqs: [
                 {
                     question: "Những dấu hiệu nào cần đi khám tim mạch ngay?",
                     answer: "Đau thắt ngực, khó thở, hồi hộp đánh trống ngực, chóng mặt thường xuyên là những dấu hiệu cần đi khám ngay.",
+                },
+                {
+                    question: "Cần chuẩn bị gì khi đi khám?",
+                    answer: "Bạn nên nhịn ăn 6-8 tiếng trước khi khám để đảm bảo kết quả xét nghiệm máu chính xác. Mang theo các kết quả khám trước đó nếu có.",
                 },
             ],
         },
@@ -101,7 +81,7 @@ export function ServicePage() {
                 </div>
                 {/* Search and Filter */}
                 <div className="mb-8">
-                    <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex flex-col md:flex-row gap-6">
                         <div className="flex-1 relative">
                             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                             <input type="text" placeholder="Tìm kiếm dịch vụ..." className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -140,27 +120,7 @@ export function ServicePage() {
                                     </ul>
                                 </div>
                                 {/* Packages */}
-                                <div className="mb-6">
-                                    <h4 className="text-lg font-semibold text-gray-800 mb-3">Gói dịch vụ</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {service.packages.map((pkg, index) => (
-                                            <div key={index} className="border border-gray-200 rounded-lg p-4">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h5 className="font-semibold text-gray-800">{pkg.name}</h5>
-                                                    <span className="text-blue-600 font-semibold">{pkg.price}</span>
-                                                </div>
-                                                <ul className="space-y-2">
-                                                    {pkg.features.map((feature, idx) => (
-                                                        <li key={idx} className="flex items-center text-sm text-gray-600">
-                                                            <ChevronRightIcon className="h-4 w-4 text-blue-600 mr-2" />
-                                                            {feature}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+
                                 {/* FAQs */}
                                 <div>
                                     <h4 className="text-lg font-semibold text-gray-800 mb-3">Câu hỏi thường gặp</h4>
@@ -180,12 +140,12 @@ export function ServicePage() {
                                         ))}
                                     </div>
                                 </div>
-                                {/* Book Button */}
-                                <div className="mt-6">
-                                    <Link to={`/booking?service=${service.id}`} className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
-                                        Đặt lịch ngay
-                                    </Link>
-                                </div>
+                            </div>
+                            {/* Book Button */}
+                            <div className="mt-6">
+                                <Link to={"/appointment"} className="block w-full bg-blue-600 text-white text-center px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
+                                    Đặt lịch ngay
+                                </Link>
                             </div>
                         </div>
                     ))}

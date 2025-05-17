@@ -14,6 +14,8 @@ const AppContextProvider = (props) => {
 
     const [doctorData, setDoctorData] = useState([]);
 
+    const [appointmentData, setAppointmentData] = useState([]);
+
     const getDepartment = async () => {
         try {
             // const url = backendUrl + "/api/admin/all-department";
@@ -60,18 +62,58 @@ const AppContextProvider = (props) => {
         }
     };
 
+    const getAppointments = async () => {
+        try {
+            const url = backendUrl + "/api/user/appointments";
+
+            let headers = {
+                Authorization: "Bearer " + token,
+            };
+
+            const { data } = await axios.get(url, {
+                headers: headers,
+            });
+
+            if (data !== false) {
+                setAppointmentData(data);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const formatDateHeader = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // tháng bắt đầu từ 0
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
     const value = {
         backendUrl,
         token,
         setToken,
         departmentData,
         doctorData,
+        appointmentData,
+        formatDateHeader,
+        getAppointments,
     };
 
     useEffect(() => {
         getDepartment();
         getDoctorData();
     }, []);
+
+    useEffect(() => {
+        if (token) {
+            getAppointments();
+        }
+    }, [token, appointmentData]);
 
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 };

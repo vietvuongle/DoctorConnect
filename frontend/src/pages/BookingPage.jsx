@@ -15,7 +15,7 @@ const steps = [
 export function BookingPage() {
     const { departmentData, doctorData, backendUrl, token } = useContext(AppContext);
 
-    const userId = sessionStorage.getItem("userId");
+    const userId = localStorage.getItem("userId");
 
     const navigate = useNavigate();
 
@@ -119,12 +119,12 @@ export function BookingPage() {
                     </div>
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Chọn ngày khám</label>
-                            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} min={new Date().toISOString().split("T")[0]} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <label className="block text-lg font-medium text-gray-700 mb-2">Chọn ngày khám</label>
+                            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} min={new Date().toISOString().split("T")[0]} className="w-[25%] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         {selectedDate && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Chọn giờ khám</label>
+                                <label className="block text-lg font-medium text-gray-700 mb-2">Chọn giờ khám</label>
                                 <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                                     {timeSlots.map((time) => (
                                         <button key={time} onClick={() => setSelectedTime(time)} className={`px-4 py-2 border rounded-md text-sm ${selectedTime === time ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:border-blue-500"}`}>
@@ -161,11 +161,18 @@ export function BookingPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
-                            <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="other">Khác</option>
-                            </select>
+                            <div className="relative w-full">
+                                <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full appearance-none px-4 py-2 pr-10 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700">
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="other">Khác</option>
+                                </select>
+
+                                {/* Icon mũi tên custom */}
+                                <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                         </div>
                     </div>
                     <div>

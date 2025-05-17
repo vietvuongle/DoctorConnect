@@ -14,6 +14,8 @@ import { BookingPage } from "./pages/BookingPage";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { ServicePage } from "./pages/ServicePage";
+import OAuth2Success from "./pages/OAuth2Success ";
+import Contact from "./pages/Contact";
 
 function App() {
     const location = useLocation();
@@ -31,7 +33,8 @@ function App() {
                 <Route path="/doctors/:speciality" element={<Doctors />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<ServicePage />} />
-                {/* <Route path="/contact" element={<Contact />} /> */}
+                <Route path="/oauth2-success" element={<OAuth2Success />} />
+                <Route path="/contact" element={<Contact />} />
                 <Route path="/my-profile" element={<MyProfile />} />
                 <Route path="/appointment" element={<BookingPage />} />
                 <Route path="/my-appointments" element={<MyAppointments />} />

@@ -20,7 +20,13 @@ const Setting = () => {
                                         Tên cơ sở
                                     </label>
                                     <div className="mt-1">
-                                        <input type="text" name="facility-name" id="facility-name" defaultValue="DoctorConnect" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="text"
+                                            name="facility-name"
+                                            id="facility-name"
+                                            defaultValue="DoctorConnect"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
                                 <div className="sm:col-span-3">
@@ -28,15 +34,41 @@ const Setting = () => {
                                         Số điện thoại
                                     </label>
                                     <div className="mt-1">
-                                        <input type="text" name="phone-number" id="phone-number" defaultValue="079.679.4969" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="text"
+                                            name="phone-number"
+                                            id="phone-number"
+                                            defaultValue="079.679.4969"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
-                                <div className="sm:col-span-6">
+                                <div className="sm:col-span-3">
                                     <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                                         Địa chỉ
                                     </label>
                                     <div className="mt-1">
-                                        <input type="text" name="address" id="address" defaultValue="75 Nguyễn Huệ, Thừa Thiên Huế" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            id="address"
+                                            defaultValue="75 Nguyễn Huệ, Thừa Thiên Huế"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="sm:col-span-3">
+                                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                                        Email
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="email"
+                                            name="address"
+                                            id="address"
+                                            defaultValue="vietvuongf@gmail.com"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -49,7 +81,13 @@ const Setting = () => {
                                         Giờ làm việc (bắt đầu)
                                     </label>
                                     <div className="mt-1">
-                                        <input type="time" name="working-hours-start" id="working-hours-start" defaultValue="08:00" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="time"
+                                            name="working-hours-start"
+                                            id="working-hours-start"
+                                            defaultValue="08:00"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
                                 <div className="sm:col-span-3">
@@ -57,7 +95,13 @@ const Setting = () => {
                                         Giờ làm việc (kết thúc)
                                     </label>
                                     <div className="mt-1">
-                                        <input type="time" name="working-hours-end" id="working-hours-end" defaultValue="17:30" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="time"
+                                            name="working-hours-end"
+                                            id="working-hours-end"
+                                            defaultValue="17:30"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
                                 <div className="sm:col-span-3">
@@ -65,7 +109,13 @@ const Setting = () => {
                                         Thời lượng mặc định (phút)
                                     </label>
                                     <div className="mt-1">
-                                        <input type="number" name="appointment-duration" id="appointment-duration" defaultValue="30" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="number"
+                                            name="appointment-duration"
+                                            id="appointment-duration"
+                                            defaultValue="30"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
                                 <div className="sm:col-span-3">
@@ -73,7 +123,13 @@ const Setting = () => {
                                         Số lượng lịch hẹn tối đa mỗi ngày
                                     </label>
                                     <div className="mt-1">
-                                        <input type="number" name="max-appointments" id="max-appointments" defaultValue="50" className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" />
+                                        <input
+                                            type="number"
+                                            name="max-appointments"
+                                            id="max-appointments"
+                                            defaultValue="50"
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
+                                        />
                                     </div>
                                 </div>
                             </div>

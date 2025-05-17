@@ -70,8 +70,13 @@ const AdminContextProvider = (props) => {
     useEffect(() => {
         getDepartment();
         getDoctorData();
-        getAllAppointment();
-    }, []);
+    }, []); // chỉ chạy 1 lần khi mount
+
+    useEffect(() => {
+        if (aToken) {
+            getAllAppointment();
+        }
+    }, [aToken]); // chạy mỗi khi aToken thay đổi
 
     return <AdminContext.Provider value={value}>{props.children}</AdminContext.Provider>;
 };

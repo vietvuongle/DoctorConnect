@@ -36,13 +36,16 @@ const Login = () => {
                     const token = data.result.token;
                     localStorage.setItem("dToken", token);
                     setDToken(token);
-                    navigate("/doctor/dashboard");
                     toast.success("Đăng nhập thành công");
+
+                    navigate("/doctor/home");
                 } else {
                     toast.error("Sai email hoặc mật khẩu");
                 }
             }
-        } catch (error) {}
+        } catch (error) {
+            toast.error("Có lỗi xảy ra, vui lòng thử lại sau");
+        }
     };
 
     return (
