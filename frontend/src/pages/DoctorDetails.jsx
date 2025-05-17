@@ -97,68 +97,69 @@ export function DoctorDetails() {
             {/* Modal đặt lịch */}
             {showBooking && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div
-                        className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-md space-y-6"
-                        style={{
-                            animation: 'fadeIn 0.3s ease-out forwards'
-                        }}
-                    >
-                        <h2 className="text-2xl font-bold text-center text-gray-800">Đặt lịch khám bệnh</h2>
+                    <div className="bg-white rounded-2xl shadow-lg p-6 w-[90%] max-w-md">
+                        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+                            Đặt lịch khám với bác sĩ {doctor.name}
+                        </h2>
 
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-gray-700 font-medium mb-1">Chọn ngày:</label>
-                                <input
-                                    type="date"
-                                    className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    onChange={(e) => setBookingDate(e.target.value)}
-                                />
-                            </div>
+                        {/* Chọn ngày */}
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-medium mb-1">Chọn ngày:</label>
+                            <input
+                                type="date"
+                                className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={bookingDate}
+                                onChange={(e) => setBookingDate(e.target.value)}
+                            />
+                        </div>
 
-                            <div>
-                                <label className="block text-gray-700 font-medium mb-2">Chọn khung giờ:</label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                    {slots.map((slot) => (
-                                        <button
-                                            key={slot}
-                                            className={`py-2 px-3 rounded-xl border text-sm text-gray-700 hover:bg-blue-100
-                                                ${selectedSlot === slot ? 'bg-blue-500 text-white font-semibold' : ''}`
-                                            }
-                                            onClick={() => setSelectedSlot(slot)}
-                                        >
-                                            {slot}
-                                        </button>
-                                    ))}
-                                </div>
+                        {/* Chọn khung giờ */}
+                        <div className="mb-6">
+                            <label className="block text-gray-700 font-medium mb-2">Chọn khung giờ:</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {slots.map((slot) => (
+                                    <button
+                                        key={slot}
+                                        className={`py-2 px-3 rounded-xl border text-sm text-gray-700 hover:bg-blue-100
+                ${selectedSlot === slot ? 'bg-blue-500 text-white font-semibold' : ''}`}
+                                        onClick={() => setSelectedSlot(slot)}
+                                    >
+                                        {slot}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-2">
+                        {/* Hành động */}
+                        <div className="flex justify-end gap-3">
                             <button
                                 className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 transition"
                                 onClick={() => setShowBooking(false)}
                             >
-                                <i className="fas fa-times mr-2"></i> Hủy
+                                Hủy
                             </button>
                             <button
                                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition"
-                                onClick={handleConfirmBooking}  // Xử lý xác nhận và chuyển trang
-                                disabled={!selectedSlot || !bookingDate}  // Kiểm tra điều kiện để xác nhận
+                                onClick={() => {
+                                    navigate("/my-appointments", {
+                                        state: {
+                                            doctor,
+                                            selectedSlot,
+                                            bookingDate,
+                                            fees: doctor.fees
+                                        }
+                                    });
+                                }}
+                                disabled={!bookingDate || !selectedSlot}
                             >
-                                <i className="fas fa-check mr-2"></i> Xác nhận
+                                Xác nhận
                             </button>
                         </div>
                     </div>
-
-                    {/* Inline CSS animation */}
-                    <style>{`
-                        @keyframes fadeIn {
-                            from { opacity: 0; transform: translateY(20px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-                    `}</style>
                 </div>
             )}
+
+
         </>
     );
 }
