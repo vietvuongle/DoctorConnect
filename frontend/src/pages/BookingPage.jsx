@@ -4,6 +4,8 @@ import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Footer } from "../components/Footer";
+import { Header } from "../components/Header";
 
 const steps = [
     { title: "Chọn chuyên khoa", description: "Chọn chuyên khoa phù hợp với nhu cầu khám" },
@@ -235,57 +237,63 @@ export function BookingPage() {
     };
 
     return (
-        <div className="py-8 bg-gray-50 min-h-screen flex items-center justify-center px-2">
-            <div className="w-full max-w-6xl">
-                {" "}
-                {/* Thay container bằng w-full và max-w-3xl */}
-                <nav className="mb-8">
-                    <ol className="flex items-center w-full">
-                        {steps.map((step, index) => (
-                            <li key={index} className={`flex items-center ${index < steps.length - 1 ? "w-full" : ""}`}>
-                                <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${index <= currentStep ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300 bg-white text-gray-500"}`}>{index + 1}</div>
-                                <div className="hidden sm:block ml-4 truncate">
-                                    <p className={`text-xl mb-2 font-medium ${index <= currentStep ? "text-blue-600" : "text-gray-800"}`}>{step.title}</p>
-                                    <p className="text-sm text-gray-500">{step.description}</p>
-                                </div>
-                                {index < steps.length - 1 && (
-                                    <div className="flex-1 hidden sm:block">
-                                        <div className={`h-0.5 ml-2 mr-2 ${index < currentStep ? "bg-blue-600" : "bg-gray-300"}`}></div>
+        <>
+            <Header />
+
+
+            <div className="py-8 bg-gray-50 min-h-screen flex items-center justify-center px-2">
+                <div className="w-full max-w-6xl">
+                    {" "}
+                    {/* Thay container bằng w-full và max-w-3xl */}
+                    <nav className="mb-8">
+                        <ol className="flex items-center w-full">
+                            {steps.map((step, index) => (
+                                <li key={index} className={`flex items-center ${index < steps.length - 1 ? "w-full" : ""}`}>
+                                    <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${index <= currentStep ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300 bg-white text-gray-500"}`}>{index + 1}</div>
+                                    <div className="hidden sm:block ml-4 truncate">
+                                        <p className={`text-xl mb-2 font-medium ${index <= currentStep ? "text-blue-600" : "text-gray-800"}`}>{step.title}</p>
+                                        <p className="text-sm text-gray-500">{step.description}</p>
                                     </div>
-                                )}
-                            </li>
-                        ))}
-                    </ol>
-                </nav>
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="mb-6 text-center">
-                        <h2 className="text-2xl font-bold text-gray-800">{steps[currentStep].title}</h2>
-                        <p className="text-gray-600">{steps[currentStep].description}</p>
+                                    {index < steps.length - 1 && (
+                                        <div className="flex-1 hidden sm:block">
+                                            <div className={`h-0.5 ml-2 mr-2 ${index < currentStep ? "bg-blue-600" : "bg-gray-300"}`}></div>
+                                        </div>
+                                    )}
+                                </li>
+                            ))}
+                        </ol>
+                    </nav>
+                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                        <div className="mb-6 text-center">
+                            <h2 className="text-2xl font-bold text-gray-800">{steps[currentStep].title}</h2>
+                            <p className="text-gray-600">{steps[currentStep].description}</p>
+                        </div>
+                        {renderStepContent()}
                     </div>
-                    {renderStepContent()}
+                    {currentStep < steps.length - 1 && (
+                        <div className="flex justify-between">
+                            <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
+                                Quay lại
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (currentStep === steps.length - 2) {
+                                        handleSubmit(new Event("submit")); // gọi hàm submit
+                                        setCurrentStep(currentStep + 1); // chuyển sang bước xác nhận
+                                    } else {
+                                        handleNext();
+                                    }
+                                }}
+                                disabled={(currentStep === 0 && !selectedDepartment) || (currentStep === 1 && (!selectedDoctor || !selectedDate || !selectedTime))}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            >
+                                {currentStep === steps.length - 2 ? "Hoàn tất" : "Tiếp tục"}
+                            </button>
+                        </div>
+                    )}
                 </div>
-                {currentStep < steps.length - 1 && (
-                    <div className="flex justify-between">
-                        <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
-                            Quay lại
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (currentStep === steps.length - 2) {
-                                    handleSubmit(new Event("submit")); // gọi hàm submit
-                                    setCurrentStep(currentStep + 1); // chuyển sang bước xác nhận
-                                } else {
-                                    handleNext();
-                                }
-                            }}
-                            disabled={(currentStep === 0 && !selectedDepartment) || (currentStep === 1 && (!selectedDoctor || !selectedDate || !selectedTime))}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                        >
-                            {currentStep === steps.length - 2 ? "Hoàn tất" : "Tiếp tục"}
-                        </button>
-                    </div>
-                )}
             </div>
-        </div>
+            <Footer />
+        </>
     );
 }

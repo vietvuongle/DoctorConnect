@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { useContext, useState } from "react";
 import { Header } from "../components/Header";
@@ -6,11 +6,24 @@ import { Footer } from "../components/Footer";
 
 export function DoctorDetails() {
     const { id } = useParams();
-    const { doctorData } = useContext(AppContext);
+    const { doctorData, userId, userEmail, userPhone } = useContext(AppContext);
+
     const [showBooking, setShowBooking] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [bookingDate, setBookingDate] = useState(null);
-    const navigate = useNavigate();
+    const [slotDate, setSlotDate] = useState(null);
+    const [step, setStep] = useState(1);
+
+    // Form đặt lịch
+    const [patientName, setPatientName] = useState("");
+    const [dob, setDob] = useState("");
+    const [gender, setGender] = useState("");
+    const [reason, setReason] = useState("");
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
+    const [symptoms, setSymptoms] = useState("");
+
+    // Giá khám có 3 lựa chọn, mặc định là phí bác sĩ nếu có, else 100000
+    const [price, setPrice] = useState(doctorData.find((d) => d.id === id)?.fees || "100000");
 
     const doctor = doctorData.find((d) => d.id === id);
 
@@ -26,20 +39,85 @@ export function DoctorDetails() {
         );
 
     const slots = [
-        "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
-        "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00"
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
     ];
 
-    const handleConfirmBooking = () => {
-        if (selectedSlot && bookingDate) {
-            navigate("/my-appointments", {
-                state: {
-                    doctor,
-                    selectedSlot,
-                    bookingDate,
-                    fees: doctor.fees
-                }
+    const handleBookingSubmit = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Bạn cần đăng nhập để đặt lịch!");
+                return;
+            }
+
+            const payload = {
+                userId: userId || "",
+                doctorId: doctor.id,
+                slotDate,
+                slotTime: selectedSlot,
+                reason,
+                price: Number(price),
+                patientName,
+                email,
+                phone,
+                dob,
+                gender,
+                cancelled: false,
+                payment: false,
+                isCompleted: false,
+                dateBooking: new Date().toISOString(),
+                symptoms,
+            };
+
+
+            const response = await fetch("http://localhost:8081/api/appointments", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
             });
+
+            if (!response.ok) {
+                let errorMessage = "Đặt lịch thất bại";
+                try {
+                    const errorData = await response.json();
+                    if (errorData.message) errorMessage = errorData.message;
+                } catch { }
+                throw new Error(errorMessage);
+            }
+
+            setShowBooking(false);
+            setSelectedSlot(null);
+            setSlotDate(null);
+            setStep(1);
+            setPatientName("");
+            setDob("");
+            setGender("");
+            setReason("");
+            setSymptoms("");
+            setPrice(doctor.fees || "100000");
+            setPhone("");
+            setEmail("");
+
+            alert("Đặt lịch thành công!");
+        } catch (error) {
+            alert(error.message || "Có lỗi xảy ra khi đặt lịch");
         }
     };
 
@@ -48,6 +126,7 @@ export function DoctorDetails() {
             <Header />
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row gap-8">
+                    {/* Left - Thông tin bác sĩ */}
                     <div className="w-full md:w-1/3 flex flex-col items-center md:items-start gap-4">
                         <img
                             src={doctor.image}
@@ -65,33 +144,30 @@ export function DoctorDetails() {
                         </div>
                     </div>
 
-                    <div className="w-full md:w-2/3 mx-auto space-y-8">
+                    {/* Right - Chi tiết bác sĩ */}
+                    <div className="w-full md:w-2/3 space-y-8">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-lg text-gray-700">
-                            <p><i className="fas fa-graduation-cap mr-2 text-blue-600"></i><span className="font-medium">Học vấn:</span> {doctor.degree}</p>
-                            <p><i className="fas fa-envelope mr-2 text-blue-600"></i><span className="font-medium">Email:</span> {doctor.email || "Đang cập nhật"}</p>
-                            <p><i className="fas fa-phone-alt mr-2 text-blue-600"></i><span className="font-medium">Số điện thoại:</span> {doctor.phone || "Đang cập nhật"}</p>
-
-                            <p><i className="fas fa-map-marker-alt mr-2 text-blue-600"></i><span className="font-medium">Địa chỉ:</span> {doctor.address || "Đang cập nhật"}</p>
-                            <p><i className="fas fa-genderless mr-2 text-blue-600"></i><span className="font-medium">Giới tính:</span> {doctor.sex || "Đang cập nhật"}</p>
-                            <p><i className="fas fa-dollar-sign mr-2 text-blue-600"></i><span className="font-medium">Phí khám:</span> {doctor.fees || "Đang cập nhật"}</p>
-
-                            <p><i className="fas fa-university mr-2 text-blue-600"></i><span className="font-medium">Trường:</span> {doctor.school || "Đang cập nhật"}</p>
-                            <p><i className="fas fa-certificate mr-2 text-blue-600"></i><span className="font-medium">Chứng chỉ:</span> {doctor.certifications?.join(", ") || "Đang cập nhật"}</p>
-                            <p><i className="fas fa-align-left mr-2 text-blue-600"></i><span className="font-medium">Mô tả:</span> {doctor.description || "Đang cập nhật"}</p>
+                            <p><strong>Học vấn:</strong> {doctor.degree}</p>
+                            <p><strong>Email:</strong> {doctor.email || "Đang cập nhật"}</p>
+                            <p><strong>Điện thoại:</strong> {doctor.phone || "Đang cập nhật"}</p>
+                            <p><strong>Địa chỉ:</strong> {doctor.address || "Đang cập nhật"}</p>
+                            <p><strong>Giới tính:</strong> {doctor.sex || "Đang cập nhật"}</p>
+                            <p><strong>Phí khám:</strong> {doctor.fees ? doctor.fees.toLocaleString("vi-VN") + " VNĐ" : "Đang cập nhật"}</p>
+                            <p><strong>Trường:</strong> {doctor.school || "Đang cập nhật"}</p>
+                            <p><strong>Chứng chỉ:</strong> {doctor.certifications?.join(", ") || "Đang cập nhật"}</p>
+                            <p><strong>Mô tả:</strong> {doctor.description || "Đang cập nhật"}</p>
                         </div>
-
-                        <div className="text-center mt-6">
+                        <div className="text-center">
                             <button
-                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-xl shadow-lg transition-transform transform hover:scale-105"
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-xl shadow-lg"
                                 onClick={() => setShowBooking(true)}
                             >
-                                <i className="fas fa-calendar-check mr-2"></i> Đặt lịch khám bệnh
+                                Đặt lịch khám bệnh
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-
             <Footer />
 
             {/* Modal đặt lịch */}
@@ -99,69 +175,162 @@ export function DoctorDetails() {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-2xl shadow-lg p-6 w-[90%] max-w-md">
                         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                            Đặt lịch khám với bác sĩ {doctor.name}
+                            Đặt lịch khám với {doctor.name}
                         </h2>
 
-                        {/* Chọn ngày */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-1">Chọn ngày:</label>
-                            <input
-                                type="date"
-                                className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={bookingDate}
-                                onChange={(e) => setBookingDate(e.target.value)}
-                            />
-                        </div>
+                        {step === 1 && (
+                            <>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 font-medium mb-1">Chọn ngày:</label>
+                                    <input
+                                        type="date"
+                                        className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={slotDate || ""}
+                                        onChange={(e) => setSlotDate(e.target.value)}
+                                    />
+                                </div>
 
-                        {/* Chọn khung giờ */}
-                        <div className="mb-6">
-                            <label className="block text-gray-700 font-medium mb-2">Chọn khung giờ:</label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                {slots.map((slot) => (
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 font-medium mb-2">Chọn khung giờ:</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {slots.map((slot) => (
+                                            <button
+                                                key={slot}
+                                                className={`py-2 px-3 rounded-xl border text-sm text-gray-700 hover:bg-blue-100
+                                                ${selectedSlot === slot ? "bg-blue-500 text-white font-semibold" : ""}`}
+                                                onClick={() => setSelectedSlot(slot)}
+                                            >
+                                                {slot}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3">
                                     <button
-                                        key={slot}
-                                        className={`py-2 px-3 rounded-xl border text-sm text-gray-700 hover:bg-blue-100
-                ${selectedSlot === slot ? 'bg-blue-500 text-white font-semibold' : ''}`}
-                                        onClick={() => setSelectedSlot(slot)}
+                                        className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700"
+                                        onClick={() => setShowBooking(false)}
                                     >
-                                        {slot}
+                                        Hủy
                                     </button>
-                                ))}
-                            </div>
-                        </div>
+                                    <button
+                                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+                                        onClick={() => setStep(2)}
+                                        disabled={!slotDate || !selectedSlot}
+                                    >
+                                        Tiếp tục
+                                    </button>
+                                </div>
+                            </>
+                        )}
 
-                        {/* Hành động */}
-                        <div className="flex justify-end gap-3">
-                            <button
-                                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 transition"
-                                onClick={() => setShowBooking(false)}
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition"
-                                onClick={() => {
-                                    navigate("/my-appointments", {
-                                        state: {
-                                            doctor,
-                                            selectedSlot,
-                                            bookingDate,
-                                            fees: doctor.fees
-                                        }
-                                    });
-                                }}
-                                disabled={!bookingDate || !selectedSlot}
-                            >
-                                Xác nhận
-                            </button>
-                        </div>
+                        {step === 2 && (
+                            <div className="max-w-4xl mx-auto px-4 py-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-1">Họ và tên bệnh nhân:</label>
+                                        <input
+                                            type="text"
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={patientName}
+                                            onChange={(e) => setPatientName(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-1">Ngày sinh:</label>
+                                        <input
+                                            type="date"
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={dob}
+                                            onChange={(e) => setDob(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-1">Giới tính:</label>
+                                        <select
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={gender}
+                                            onChange={(e) => setGender(e.target.value)}
+                                        >
+                                            <option value="">Chọn giới tính</option>
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                    </div>
+
+
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-1">Email:</label>
+                                        <input
+                                            type="email"
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-1">Số điện thoại:</label>
+                                        <input
+                                            type="tel"
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                        />
+                                    </div>
+
+
+
+
+                                    <div>
+                                        <label className="block text-gray-700 font-medium mb-1">Chọn mức phí khám:</label>
+                                        <select
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={price}
+                                            onChange={(e) => setPrice(e.target.value)}
+                                        >
+                                            <option value="100000">100,000</option>
+                                            <option value="200000">200,000</option>
+                                            <option value="400000">400,000</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="block text-gray-700 font-medium mb-1">Lý do khám:</label>
+                                        <textarea
+                                            className="w-full h-32 border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={reason}
+                                            onChange={(e) => setReason(e.target.value)}
+                                        />
+                                    </div>
+
+                                </div>
+
+                                <div className="flex justify-between gap-3 mt-6">
+                                    <button
+                                        className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700"
+                                        onClick={() => setStep(1)}
+                                    >
+                                        Quay lại
+                                    </button>
+                                    <button
+                                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+                                        onClick={handleBookingSubmit}
+                                        disabled={!patientName || !dob || !gender || !reason}
+                                    >
+                                        Xác nhận đặt lịch
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             )}
-
-
         </>
     );
 }
-
-export default DoctorDetails;
+export default DoctorDetails

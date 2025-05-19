@@ -12,6 +12,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Doctors } from './pages/Doctors'
 import { DoctorDetails } from './pages/DoctorDetails';
+import { BookingPage } from './pages/BookingPage'
 
 function App() {
 
@@ -28,8 +29,10 @@ function App() {
         <Route path="/doctor/:id" element={<DoctorDetails />} />
         <Route path='/my-profile' element={<MyProfile />} />
         <Route path='/contact' element={<Contact />} />
+        <Route path='/booking' element={<BookingPage />} />
         {/* <Route path="/appointment" element={<BookingPage />} /> */}
-        <Route path='/my-appointments' element={<MyAppointments />} />
+        <Route path="/appointments" element={<BookingPage />} />
+        <Route path='/my-appointments' element={<Appointment />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
       </Routes>
     </div>
