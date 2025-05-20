@@ -13,7 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Doctors } from './pages/Doctors'
 import { DoctorDetails } from './pages/DoctorDetails';
 import { BookingPage } from './pages/BookingPage'
-
+import { DepartmentDetails } from './pages/DepartmentDetails';
 function App() {
 
   return (
@@ -34,6 +34,9 @@ function App() {
         <Route path="/appointments" element={<BookingPage />} />
         <Route path='/my-appointments' element={<Appointment />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
+
+
+        <Route path="/department/:id" element={<DepartmentDetails />} />
       </Routes>
     </div>
   )
