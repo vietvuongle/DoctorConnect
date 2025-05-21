@@ -48,6 +48,7 @@ function App() {
                     <Route path="/doctor/dashboard" element={<Dashboard />} />
                     <Route path="/doctor/home" element={<HomeDoctor />} />
                     <Route path="/doctor/patient" element={<PatientOfDoctor />} />
+                    <Route path="/doctor/patient/:patientId" element={<ViewMedicalRecord />} />
                     <Route path="/doctor/view-medical" element={<ViewMedicalRecord />} />
                     <Route path="/doctor/create-medical/:userId" element={<CreateMedicalRecord />} />
                 </Routes>

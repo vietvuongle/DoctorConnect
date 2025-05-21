@@ -99,21 +99,21 @@ const Setting = () => {
                                             type="time"
                                             name="working-hours-end"
                                             id="working-hours-end"
-                                            defaultValue="17:30"
+                                            defaultValue="17:00"
                                             className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
                                         />
                                     </div>
                                 </div>
                                 <div className="sm:col-span-3">
                                     <label htmlFor="appointment-duration" className="block text-sm font-medium text-gray-700">
-                                        Thời lượng mặc định (phút)
+                                        Thời lượng mặc định (tiếng)
                                     </label>
                                     <div className="mt-1">
                                         <input
                                             type="number"
                                             name="appointment-duration"
                                             id="appointment-duration"
-                                            defaultValue="30"
+                                            defaultValue="1"
                                             className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
                                         />
                                     </div>
@@ -145,14 +145,7 @@ const Setting = () => {
                                         </label>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <input id="sms-notifications" name="sms-notifications" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" defaultChecked />
-                                        <label htmlFor="sms-notifications" className="ml-2 block text-sm text-gray-900">
-                                            Gửi thông báo qua SMS
-                                        </label>
-                                    </div>
-                                </div>
+
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <input id="appointment-reminders" name="appointment-reminders" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" defaultChecked />

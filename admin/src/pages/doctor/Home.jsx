@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
     const { appointmentData, backendUrl, getAllAppointment, dToken, calculateAge, formatDateHeader } = useContext(DoctorContext);
 
+    console.log(appointmentData);
+
     const navigate = useNavigate();
 
     const [currentDate, setCurrentDate] = useState(() => {
@@ -144,9 +146,16 @@ const Home = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div>
-                                            <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã xác nhận</span>
-                                        </div>
+                                        {appointment.confirm && !appointment.completed && (
+                                            <div>
+                                                <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã xác nhận</span>
+                                            </div>
+                                        )}
+                                        {appointment.completed && (
+                                            <div>
+                                                <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã hoàn thành</span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td>
                                         <div className="flex flex-col items-center gap-y-2 py-4">
@@ -159,12 +168,14 @@ const Home = () => {
                                             >
                                                 Tạo bệnh án
                                             </button>
-                                            <button
-                                                onClick={() => compleAppointment(appointment._id)}
-                                                className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                            >
-                                                Hoàn thành
-                                            </button>
+                                            {!appointment.completed && appointment.payment && (
+                                                <button
+                                                    onClick={() => compleAppointment(appointment._id)}
+                                                    className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                >
+                                                    Hoàn thành
+                                                </button>
+                                            )}
                                             {/* <button className="text-sm text-red-600 hover:text-red-800 font-medium">Hoãn lịch</button> */}
                                         </div>
                                     </td>

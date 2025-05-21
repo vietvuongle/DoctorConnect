@@ -22,6 +22,7 @@ const DoctorContextProvider = (props) => {
                 headers: headers,
             });
             if (data !== false) {
+                localStorage.setItem("doctorId", data.result.id);
                 setDoctorUser(data.result);
             } else {
                 toast.error("Có lỗi xảy ra");

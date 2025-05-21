@@ -1,9 +1,11 @@
 import React from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { useContext } from "react";
+import { DoctorContext } from "../../context/DoctorContext";
 
 const Schedule = () => {
     const { appointmentData, doctorData } = useContext(AdminContext);
+    const { formatDateHeader } = useContext(DoctorContext);
 
     return (
         <div className="w-full m-5">
@@ -44,7 +46,7 @@ const Schedule = () => {
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Trạng thái
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Thao tác
                                 </th>
                             </tr>
@@ -63,7 +65,7 @@ const Schedule = () => {
                                         <div className="text-sm text-gray-900">{appointment.email}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{appointment.slotDate}</div>
+                                        <div className="text-sm text-gray-900">{formatDateHeader(appointment.slotDate)}</div>
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap">

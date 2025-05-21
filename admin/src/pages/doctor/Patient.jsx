@@ -1,10 +1,15 @@
 import React, { useContext, useState } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
+import { useNavigate } from "react-router-dom";
 
 const Patient = () => {
     const { appointmentData, calculateAge, formatDateHeader } = useContext(DoctorContext);
 
+    const navigate = useNavigate();
+
     // Lọc ra các appointment đã hoàn thành
+    console.log("appointmentData", appointmentData);
+
     const seenUserIds = new Set();
 
     const completedAppointments = appointmentData.filter((appointment) => {
@@ -14,6 +19,8 @@ const Patient = () => {
         }
         return false;
     });
+
+    console.log("completed", completedAppointments);
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3;
@@ -111,7 +118,15 @@ const Patient = () => {
                                     <div className="text-sm text-gray-500 mt-2">Gần nhất: {formatDateHeader(closestAppointment?.slotDate)}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <button className="text-white bg-primary border p-2 rounded-full hover:opacity-80">Xem hồ sơ</button>
+                                    <button
+                                        onClick={() => {
+                                            navigate(`/doctor/patient/${appointment.userId}`);
+                                            scrollTo(0, 0);
+                                        }}
+                                        className="text-white bg-primary border p-2 rounded-full hover:opacity-80"
+                                    >
+                                        Xem hồ sơ
+                                    </button>
                                     <button className="text-white bg-green-600 border p-2 ml-3 rounded-full hover:opacity-80">Lịch sử khám</button>
                                 </td>
                             </tr>
