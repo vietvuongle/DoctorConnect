@@ -7,20 +7,25 @@ export const AppContext = createContext();
 const AppContextProvider = (props) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    const [token, setToken] = useState(localStorage.getItem("token") || false);
+    const [token, setToken] = useState(localStorage.getItem("token") ? localStorage.getItem("token") : false);
 
     const [departmentData, setDepartmentData] = useState([]);
     const [doctorData, setDoctorData] = useState([]);
 
-    const [appointments, setAppointments] = useState([]);
-
-    const addAppointment = (newAppointment) => {
-        setAppointments((prev) => [...prev, newAppointment]);
-        toast.success("Đặt lịch thành công!");
-    };
+    const [appointmentData, setAppointmentData] = useState([]);
 
     const getDepartment = async () => {
         try {
+            // const url = backendUrl + "/api/admin/all-department";
+
+            // let headers = {
+            //     Authorization: "Bearer " + token,
+            // };
+
+            // const { data } = await axios.get(url, {
+            //     headers: headers,
+            // });
+
             const { data } = await axios.get(backendUrl + "/api/admin/all-department");
             if (data !== false) {
                 setDepartmentData(data.result);
@@ -34,6 +39,14 @@ const AppContextProvider = (props) => {
 
     const getDoctorData = async () => {
         try {
+            // const url = backendUrl + "/api/admin/all-doctor";
+            // let headers = {
+            //     Authorization: "Bearer " + token,
+            // };
+            // const { data } = await axios.get(url, {
+            //     headers: headers,
+            // });
+
             const { data } = await axios.get(backendUrl + "/api/admin/all-doctor");
             if (data !== false) {
                 setDoctorData(data.result);
@@ -45,10 +58,36 @@ const AppContextProvider = (props) => {
         }
     };
 
-    useEffect(() => {
-        getDepartment();
-        getDoctorData();
-    }, []);
+    const getAppointments = async () => {
+        try {
+            const url = backendUrl + "/api/user/appointments";
+
+            let headers = {
+                Authorization: "Bearer " + token,
+            };
+
+            const { data } = await axios.get(url, {
+                headers: headers,
+            });
+
+            if (data !== false) {
+                setAppointmentData(data);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const formatDateHeader = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // tháng bắt đầu từ 0
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
 
     const value = {
         backendUrl,
@@ -56,9 +95,21 @@ const AppContextProvider = (props) => {
         setToken,
         departmentData,
         doctorData,
-        appointments,
-        addAppointment,
+        appointmentData,
+        formatDateHeader,
+        getAppointments,
     };
+
+    useEffect(() => {
+        getDepartment();
+        getDoctorData();
+    }, []);
+
+    useEffect(() => {
+        if (token) {
+            getAppointments();
+        }
+    }, []);
 
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 };

@@ -108,14 +108,6 @@ const DoctorDetail = () => {
         docInfo && (
             <div className="min-h-screen bg-gray-100 py-8 w-full">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="mb-8 flex items-center justify-between">
-                        <div className="flex items-center">
-                            <Link to="/admin/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                                Quay lại
-                            </Link>
-                        </div>
-                    </div>
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">Thông tin chi tiết bác sĩ</h2>
@@ -335,22 +327,34 @@ const DoctorDetail = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div></div>
-                            <div className="flex justify-end items-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsEditing(!isEditing);
-                                        handleStartEdit();
-                                    }}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    Chỉnh sửa
-                                </button>
-                                <button type="submit" className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                    <SaveIcon className="w-5 h-5 mr-2" />
-                                    <p>Lưu thay đổi</p>
-                                </button>
+
+                            <div className="flex justify-between items-end gap-2">
+                                <div className=" flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <Link to="/admin/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                            <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                                            Quay lại
+                                        </Link>
+                                    </div>
+                                </div>
+                                {!isEditing && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsEditing(!isEditing);
+                                            handleStartEdit();
+                                        }}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Chỉnh sửa
+                                    </button>
+                                )}
+                                {isEditing && (
+                                    <button type="submit" className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                        <SaveIcon className="w-5 h-5 mr-2" />
+                                        <p>Lưu thay đổi</p>
+                                    </button>
+                                )}
                             </div>
                         </form>
                     </div>

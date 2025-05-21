@@ -69,7 +69,7 @@ const Sidebar = () => {
                 </div>
             )}
             {dToken && (
-                <div className="lg:col-span-1 mt-5 ml-5 md:flex md:w-72 md:flex-col">
+                <div className="lg:col-span-1 mt-5 ml-5 mr-5 md:flex md:w-72 md:flex-col">
                     <div className="rounded-lg shadow overflow-hidden">
                         <div className="p-6 bg-blue-600 text-white">
                             <div className="flex items-center">
@@ -82,7 +82,7 @@ const Sidebar = () => {
                                 </div>
                             </div>
                         </div>
-                        <nav className="flex-1 px-4 space-y-1.5 my-4 ">
+                        <nav className="flex-1 px-4 space-y-1 my-4 ">
                             <NavLink to={"/doctor/home"} className={({ isActive }) => `ml-1 group flex items-center px-2 py-3 text-sm font-medium rounded-md w-full ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}>
                                 <CalendarIcon className="mr-3 flex-shrink-0 h-6 w-6" />
                                 <p className="hidden md:block">Lịch khám</p>
@@ -93,7 +93,7 @@ const Sidebar = () => {
                                 <p className="hidden md:block">Bệnh nhân</p>
                             </NavLink>
 
-                            <NavLink to={"/doctor/medicalRecord"} className={({ isActive }) => `ml-1 group flex items-center px-2 py-3 text-sm font-medium rounded-md w-full ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}>
+                            <NavLink to={"/doctor/view-medical"} className={({ isActive }) => `ml-1 group flex items-center px-2 py-3 text-sm font-medium rounded-md w-full ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-50"}`}>
                                 <FileTextIcon className="mr-3 flex-shrink-0 h-6 w-6" />
                                 <p className="hidden md:block">Hồ sơ y tế</p>
                             </NavLink>
