@@ -14,6 +14,7 @@ import { Doctors } from './pages/Doctors'
 import { DoctorDetails } from './pages/DoctorDetails';
 import { BookingPage } from './pages/BookingPage'
 import { DepartmentDetails } from './pages/DepartmentDetails';
+import { ServicePage } from './pages/ServicePage';
 function App() {
 
   return (
@@ -25,7 +26,7 @@ function App() {
         <Route path='/doctors' element={<Doctors />} />
         <Route path='/doctors/:speciality' element={<Doctors />} />
         <Route path='/about' element={<About />} />
-        {/* <Route path="/services" element={<ServicePage />} /> */}
+        <Route path="/services" element={<ServicePage />} />
         <Route path="/doctor/:id" element={<DoctorDetails />} />
         <Route path='/my-profile' element={<MyProfile />} />
         <Route path='/contact' element={<Contact />} />
