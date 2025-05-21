@@ -1,7 +1,6 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
 
 export const AppContext = createContext();
 
@@ -11,7 +10,6 @@ const AppContextProvider = (props) => {
     const [token, setToken] = useState(localStorage.getItem("token") ? localStorage.getItem("token") : false);
 
     const [departmentData, setDepartmentData] = useState([]);
-
     const [doctorData, setDoctorData] = useState([]);
 
     const [appointmentData, setAppointmentData] = useState([]);
@@ -29,7 +27,6 @@ const AppContextProvider = (props) => {
             // });
 
             const { data } = await axios.get(backendUrl + "/api/admin/all-department");
-
             if (data !== false) {
                 setDepartmentData(data.result);
             } else {
@@ -51,7 +48,6 @@ const AppContextProvider = (props) => {
             // });
 
             const { data } = await axios.get(backendUrl + "/api/admin/all-doctor");
-
             if (data !== false) {
                 setDoctorData(data.result);
             } else {
@@ -113,7 +109,7 @@ const AppContextProvider = (props) => {
         if (token) {
             getAppointments();
         }
-    }, [token, appointmentData]);
+    }, []);
 
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 };

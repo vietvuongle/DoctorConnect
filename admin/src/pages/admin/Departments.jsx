@@ -105,7 +105,7 @@ export function Departments() {
             } else {
                 toast.error("Thêm khoa thất bại");
             }
-        } catch (error) {}
+        } catch (error) { }
     };
 
     return (

@@ -145,7 +145,6 @@ const Setting = () => {
                                         </label>
                                     </div>
                                 </div>
-
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <input id="appointment-reminders" name="appointment-reminders" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" defaultChecked />

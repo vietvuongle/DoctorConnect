@@ -77,7 +77,7 @@ const AddDoctor = () => {
             } else {
                 toast.error("Thêm bác sĩ thất bại!");
             }
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const handleFeesChange = (e) => {

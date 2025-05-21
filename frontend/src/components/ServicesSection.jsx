@@ -3,6 +3,7 @@ import { Stethoscope as StethoscopeIcon, Heart as HeartIcon, Brain as BrainIcon,
 import { assets } from "../assets/assets";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
+import { Link } from "react-router-dom";
 
 export function ServicesSection() {
     const services = [
@@ -54,9 +55,12 @@ export function ServicesSection() {
                             <div className="p-4">
                                 <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.name}</h3>
                                 <p className="text-gray-600">{item.description}</p>
-                                <a href="#" className="mt-4 inline-block text-blue-600 font-medium hover:text-blue-700">
+                                <Link
+                                    to={`/department/${item.id}`}  // dùng item.id để chuyển trang chi tiết
+                                    className="mt-4 inline-block text-blue-600 font-medium hover:text-blue-700"
+                                >
                                     Chi tiết →
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     ))}

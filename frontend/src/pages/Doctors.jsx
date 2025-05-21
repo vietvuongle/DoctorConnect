@@ -1,8 +1,11 @@
 import React, { useContext, useState } from "react";
 import { Search as SearchIcon, Filter as FilterIcon, Star as StarIcon, Calendar as CalendarIcon } from "lucide-react";
 import { AppContext } from "../context/AppContext";
+import { Link } from "react-router-dom";
+
 export function Doctors() {
-    const { doctorData, departmentData } = useContext(AppContext);
+    const { departmentData } = useContext(AppContext);
+    const { doctorData } = useContext(AppContext);
 
     const [selectedSpecialty, setSelectedSpecialty] = useState("Tất cả chuyên khoa");
     const [searchQuery, setSearchQuery] = useState("");
@@ -60,31 +63,37 @@ export function Doctors() {
                                     <img src={doctor.image} alt={doctor.name} className="w-full h-48 md:h-full object-cover" />
                                 </div>
                                 <div className="md:w-2/3 p-6">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h2 className="text-xl font-semibold text-gray-800">{doctor.name}</h2>
-                                            <p className="text-blue-600">{doctor.speciality}</p>
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                {/* <Link to={`/doctor/${doctor.id}`}> */}
+                                                <h2 className="text-xl font-semibold text-gray-800 hover:underline">Bác Sĩ: {doctor.name}</h2>
+                                                {/* </Link> */}
+                                                <p className="text-blue-600">{doctor.speciality}</p>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                                                <span className="ml-1 text-gray-600">{doctor.rating}</span>
+                                                <span className="text-gray-400 text-sm ml-1">({doctor.reviewCount})</span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center">
-                                            <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                                            <span className="ml-1 text-gray-600">{doctor.rating}</span>
-                                            <span className="text-gray-400 text-sm ml-1">({doctor.reviewCount})</span>
+                                        <div className="mb-4">
+                                            <p className="text-gray-600 text-sm mb-1">{doctor.experience} kinh nghiệm</p>
+                                            <p className="text-gray-600 text-sm mb-1">Trường đại học y dược Huế</p>
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{doctor.degree}</span>
+                                                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{doctor.degree}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="mb-4">
-                                        <p className="text-gray-600 text-sm mb-1">{doctor.experience} kinh nghiệm</p>
-                                        <p className="text-gray-600 text-sm mb-1">{doctor.school}</p>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{doctor.degree}</span>
-                                            <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{doctor.degree}</span>{" "}
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                            <div className="flex items-center text-green-600">
+                                                <CalendarIcon className="h-5 w-5 mr-1" />
+                                                <span className="text-sm">Lịch trống: {doctor.nextAvailable}</span>
+                                            </div>
+                                            <Link to={`/doctor/${doctor.id}`}>
+                                                <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">Đặt lịch khám</button>
+                                            </Link>
                                         </div>
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                        <div className="flex items-center text-green-600">
-                                            {/* <CalendarIcon className="h-5 w-5 mr-1" /> */}
-                                            <span className="text-xl">Giá: {Number(doctor.fees).toLocaleString("vi-VN")} vnđ</span>
-                                        </div>
-                                        <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">Đặt lịch khám</button>
                                     </div>
                                 </div>
                             </div>

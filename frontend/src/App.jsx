@@ -16,6 +16,7 @@ import { Footer } from "./components/Footer";
 import { ServicePage } from "./pages/ServicePage";
 import OAuth2Success from "./pages/OAuth2Success ";
 import Contact from "./pages/Contact";
+import DoctorDetails from "./pages/DoctorDetails";
 
 function App() {
     const location = useLocation();
@@ -30,7 +31,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/doctors" element={<Doctors />} />
-                <Route path="/doctors/:speciality" element={<Doctors />} />
+                <Route path="/doctor/:id" element={<DoctorDetails />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<ServicePage />} />
                 <Route path="/oauth2-success" element={<OAuth2Success />} />
