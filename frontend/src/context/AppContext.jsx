@@ -11,21 +11,26 @@ const AppContextProvider = (props) => {
 
     const [departmentData, setDepartmentData] = useState([]);
     const [doctorData, setDoctorData] = useState([]);
+    const [allUserData, setAllUserData] = useState([]);
 
     const [appointmentData, setAppointmentData] = useState([]);
 
+    const getAllUser = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/user/all-user");
+
+            if (data !== false) {
+                setAllUserData(data.result);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
     const getDepartment = async () => {
         try {
-            // const url = backendUrl + "/api/admin/all-department";
-
-            // let headers = {
-            //     Authorization: "Bearer " + token,
-            // };
-
-            // const { data } = await axios.get(url, {
-            //     headers: headers,
-            // });
-
             const { data } = await axios.get(backendUrl + "/api/admin/all-department");
             if (data !== false) {
                 setDepartmentData(data.result);
@@ -39,14 +44,6 @@ const AppContextProvider = (props) => {
 
     const getDoctorData = async () => {
         try {
-            // const url = backendUrl + "/api/admin/all-doctor";
-            // let headers = {
-            //     Authorization: "Bearer " + token,
-            // };
-            // const { data } = await axios.get(url, {
-            //     headers: headers,
-            // });
-
             const { data } = await axios.get(backendUrl + "/api/admin/all-doctor");
             if (data !== false) {
                 setDoctorData(data.result);
@@ -98,18 +95,20 @@ const AppContextProvider = (props) => {
         appointmentData,
         formatDateHeader,
         getAppointments,
+        allUserData,
     };
 
     useEffect(() => {
         getDepartment();
         getDoctorData();
+        getAllUser();
     }, []);
 
     useEffect(() => {
         if (token) {
             getAppointments();
         }
-    }, []);
+    }, [token]);
 
     return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
 };

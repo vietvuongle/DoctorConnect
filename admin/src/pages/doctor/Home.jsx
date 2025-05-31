@@ -9,8 +9,6 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
     const { appointmentData, backendUrl, getAllAppointment, dToken, calculateAge, formatDateHeader } = useContext(DoctorContext);
 
-    console.log(appointmentData);
-
     const navigate = useNavigate();
 
     const [currentDate, setCurrentDate] = useState(() => {
@@ -146,9 +144,14 @@ const Home = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        {appointment.confirm && !appointment.completed && (
+                                        {appointment.confirm && !appointment.completed && !appointment.payment && !appointment.payment && (
                                             <div>
                                                 <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã xác nhận</span>
+                                            </div>
+                                        )}
+                                        {appointment.payment && !appointment.completed && (
+                                            <div>
+                                                <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full text-white bg-blue-600">Đã thanh toán</span>
                                             </div>
                                         )}
                                         {appointment.completed && (
@@ -159,23 +162,31 @@ const Home = () => {
                                     </td>
                                     <td>
                                         <div className="flex flex-col items-center gap-y-2 py-4">
-                                            <button
-                                                onClick={() => {
-                                                    navigate(`/doctor/create-medical/${appointment.userId}`);
-                                                    scrollTo(0, 0);
-                                                }}
-                                                className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                            >
-                                                Tạo bệnh án
-                                            </button>
+                                            {appointment.payment && !appointment.completed && (
+                                                <button
+                                                    onClick={() => {
+                                                        navigate(`/doctor/create-medical/${appointment.userId}`);
+                                                        scrollTo(0, 0);
+                                                    }}
+                                                    className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                >
+                                                    Tạo bệnh án
+                                                </button>
+                                            )}
                                             {!appointment.completed && appointment.payment && (
                                                 <button
-                                                    onClick={() => compleAppointment(appointment._id)}
+                                                    onClick={() => {
+                                                        const confirmComplete = window.confirm("Bạn có chắc chắn muốn đánh dấu cuộc hẹn này là 'Hoàn thành'?");
+                                                        if (confirmComplete) {
+                                                            compleAppointment(appointment._id);
+                                                        }
+                                                    }}
                                                     className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                                 >
                                                     Hoàn thành
                                                 </button>
                                             )}
+
                                             {/* <button className="text-sm text-red-600 hover:text-red-800 font-medium">Hoãn lịch</button> */}
                                         </div>
                                     </td>
@@ -251,7 +262,12 @@ const Home = () => {
 
                                             {!appointment.cancelled && (
                                                 <button
-                                                    onClick={() => cancelAppointment(appointment._id)}
+                                                    onClick={() => {
+                                                        const confirmCancelled = window.confirm("Bạn có chắc chắn muốn hủy lịch hẹn");
+                                                        if (confirmCancelled) {
+                                                            cancelAppointment(appointment._id);
+                                                        }
+                                                    }}
                                                     className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                 >
                                                     <XIcon className="w-4 h-4 mr-1" />

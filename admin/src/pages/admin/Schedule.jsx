@@ -2,17 +2,35 @@ import React from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { useContext } from "react";
 import { DoctorContext } from "../../context/DoctorContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Schedule = () => {
-    const { appointmentData, doctorData } = useContext(AdminContext);
+    const { appointmentData, doctorData, aToken, backendUrl, getDepartment } = useContext(AdminContext);
     const { formatDateHeader } = useContext(DoctorContext);
 
+    const confirmAppointment = async (id) => {
+        try {
+            const { data } = await axios.put(
+                `${backendUrl}/api/doctor/appointment/confirm/${id}`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${aToken}` },
+                }
+            );
+            toast.success("Đã xác nhận thành công");
+            getDepartment(); // load lại danh sách
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || "Xác nhận thất bại");
+        }
+    };
+
     return (
-        <div className="w-full m-5">
-            <div className="flex justify-between items-center mb-6 mr-5">
+        <div className="mt-5 mr-2 overflow-x-auto max-w-full">
+            <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Quản lý lịch hẹn</h1>
                 <div className="flex space-x-3">
-                    <input type="date" className="border border-gray-300 rounded-md text-sm p-2" />
                     <select className="border border-gray-300 rounded-md text-sm p-2">
                         <option value="">Tất cả trạng thái</option>
                         <option value="confirmed">Đã xác nhận</option>
@@ -25,7 +43,7 @@ const Schedule = () => {
             </div>
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div className="overflow-x-auto">
-                    <table className=" divide-y divide-gray-200 w-[95%]">
+                    <table className=" divide-y divide-gray-200 w-full">
                         <thead className="bg-gray-50">
                             <tr>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -73,16 +91,19 @@ const Schedule = () => {
 
                                         {appointment.cancelled && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Đã hủy</span>}
 
-                                        {!appointment.cancelled && appointment.confirm && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Đã xác nhận</span>}
+                                        {!appointment.cancelled && appointment.confirm && !appointment.payment && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 text-white">Đã xác nhận</span>}
 
-                                        {!appointment.cancelled && !appointment.confirm && !appointment.completed && appointment.payment && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đã thanh toán</span>}
+                                        {!appointment.cancelled && !appointment.completed && appointment.payment && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-blue-600">Đã thanh toán</span>}
 
-                                        {!appointment.cancelled && !appointment.confirm && appointment.completed && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 text-blue-800">Hoàn thành</span>}
+                                        {appointment.payment && appointment.confirm && appointment.completed && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 text-white">Hoàn thành</span>}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button className="text-blue-600 hover:text-blue-900 mr-3">Xem</button>
-                                        <button className="text-blue-600 hover:text-blue-900 mr-3">Sửa</button>
-                                        <button className="text-red-600 hover:text-red-900">Hủy</button>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                        {!appointment.confirm && (
+                                            <button onClick={() => confirmAppointment(appointment._id)} className="text-blue-600 hover:text-blue-900 mr-3">
+                                                Xác nhận
+                                            </button>
+                                        )}
+                                        {!appointment.confirm && <button className="text-red-600 hover:text-red-900">Hủy</button>}
                                     </td>
                                 </tr>
                             ))}

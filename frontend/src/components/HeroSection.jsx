@@ -17,6 +17,8 @@ export function HeroSection() {
                 headers: headers,
             });
 
+            console.log("data", data);
+
             if (data !== null) {
                 localStorage.setItem("userId", data.result._id);
             } else {

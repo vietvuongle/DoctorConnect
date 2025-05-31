@@ -69,6 +69,14 @@ const DoctorContextProvider = (props) => {
         return `${day}/${month}/${year}`;
     };
 
+    function removeVietnameseTones(str) {
+        return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D");
+    }
+
     const value = {
         dToken,
         setDToken,
@@ -78,6 +86,7 @@ const DoctorContextProvider = (props) => {
         getAllAppointment,
         calculateAge,
         formatDateHeader,
+        removeVietnameseTones,
     };
 
     useEffect(() => {
