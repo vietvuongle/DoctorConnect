@@ -3,12 +3,11 @@ import { DoctorContext } from "../../context/DoctorContext";
 import { useNavigate } from "react-router-dom";
 
 const Patient = () => {
-    const { appointmentData, calculateAge, formatDateHeader } = useContext(DoctorContext);
+    const { appointmentData, calculateAge, formatDateHeader, removeVietnameseTones } = useContext(DoctorContext);
 
     const navigate = useNavigate();
 
-    // Lọc ra các appointment đã hoàn thành
-    console.log("appointmentData", appointmentData);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const seenUserIds = new Set();
 
@@ -27,8 +26,14 @@ const Patient = () => {
     const totalItems = completedAppointments.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+    const filteredAppointments = completedAppointments.filter((appointment) =>
+        removeVietnameseTones(appointment.patientName || "")
+            .toLowerCase()
+            .includes(removeVietnameseTones(searchTerm).toLowerCase())
+    );
+
     // Lấy phần tử cho trang hiện tại
-    const currentPatients = completedAppointments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const currentPatients = filteredAppointments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     // Hàm chuyển trang
     function goToPage(page) {
@@ -66,7 +71,16 @@ const Patient = () => {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Danh sách bệnh nhân</h2>
             <div className="mb-4">
                 <div className="relative">
-                    <input type="text" placeholder="Tìm kiếm bệnh nhân..." className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" />
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setCurrentPage(1); // Reset về trang đầu mỗi khi tìm kiếm
+                        }}
+                        placeholder="Tìm kiếm bệnh nhân..."
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -123,11 +137,10 @@ const Patient = () => {
                                             navigate(`/doctor/patient/${appointment.userId}`);
                                             scrollTo(0, 0);
                                         }}
-                                        className="text-white bg-primary border p-2 rounded-full hover:opacity-80"
+                                        className="text-white bg-primary border p-2 ml-6 rounded-full hover:opacity-80"
                                     >
-                                        Xem hồ sơ
+                                        Lịch sử khám bệnh
                                     </button>
-                                    <button className="text-white bg-green-600 border p-2 ml-3 rounded-full hover:opacity-80">Lịch sử khám</button>
                                 </td>
                             </tr>
                         ))}

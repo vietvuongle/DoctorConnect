@@ -214,7 +214,7 @@ const MyProfile = () => {
                     </div>
 
                     {/* Change Password Form */}
-                    <div className="max-w-md w-full bg-white p-6 rounded-xl shadow-md mt-10">
+                    <div className="max-w-md w-full bg-white p-6 rounded-xl shadow-md">
                         <h2 className="text-2xl font-semibold mb-4">Đổi mật khẩu</h2>
 
                         <form onSubmit={handleChangePassword} className="space-y-4">

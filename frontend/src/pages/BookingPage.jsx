@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { Calendar as CalendarIcon, Clock as ClockIcon, ChevronRight as ChevronRightIcon, CheckCircle as CheckCircleIcon } from "lucide-react";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const steps = [
@@ -17,7 +16,7 @@ export function BookingPage() {
 
     const userId = localStorage.getItem("userId");
 
-    const navigate = useNavigate();
+    const [appointmentWithDoctor, setAppointmentWithDoctor] = useState([]);
 
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -41,6 +40,50 @@ export function BookingPage() {
         e.preventDefault();
 
         try {
+            if (!selectedDoctor || !selectedTime || !selectedDate) {
+                toast.warning("Vui lòng chọn đầy đủ thông tin bác sĩ, ngày và giờ khám.");
+                return;
+            }
+
+            if (!patientName.trim()) {
+                toast.warning("Vui lòng nhập họ tên bệnh nhân.");
+                return;
+            }
+
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                toast.warning("Số điện thoại không hợp lệ. Phải có 10 chữ số và bắt đầu bằng số 0.");
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                toast.warning("Email không hợp lệ.");
+                return;
+            }
+
+            const today = new Date();
+            const dobDate = new Date(dob);
+            if (!dob || dobDate > today) {
+                toast.warning("Ngày sinh không hợp lệ.");
+                return;
+            }
+
+            if (!gender) {
+                toast.warning("Vui lòng chọn giới tính.");
+                return;
+            }
+
+            if (!reason.trim()) {
+                toast.warning("Vui lòng nhập lý do khám.");
+                return;
+            }
+
+            if (!price || Number(price) <= 0) {
+                toast.warning("Giá khám không hợp lệ.");
+                return;
+            }
+
             const formData = new FormData();
             formData.append("patientName", patientName);
             formData.append("phone", phone);
@@ -67,6 +110,8 @@ export function BookingPage() {
 
             if (code === 1000 && result) {
                 toast.success("Đăng kí thành công");
+
+                setCurrentStep(currentStep + 1);
             } else {
                 toast.error("Đăng kí thất bại");
             }
@@ -74,6 +119,24 @@ export function BookingPage() {
             toast.error("Đặt lịch khám thất bại");
         }
     };
+
+    const getAppointmentByDoctorId = async (doctorId) => {
+        try {
+            const url = backendUrl + `/api/user/appointments/${doctorId}`;
+            let headers = {
+                Authorization: "Bearer " + token,
+            };
+            const { data } = await axios.get(url, {
+                headers: headers,
+            });
+
+            setAppointmentWithDoctor(data);
+        } catch (error) {}
+    };
+
+    const bookedTimes = appointmentWithDoctor.filter((app) => app.doctorId === selectedDoctor && app.slotDate === selectedDate).map((app) => app.slotTime);
+
+    const availableTimeSlots = timeSlots.filter((time) => !bookedTimes.includes(time));
 
     const renderStepContent = () => {
         if (currentStep === 0) {
@@ -100,23 +163,32 @@ export function BookingPage() {
             return (
                 <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        {doctorData
-                            .filter((doc) => doc.speciality === selectedDepartment)
-                            .map((doctor) => (
-                                <button
-                                    key={doctor.id}
-                                    onClick={() => (setSelectedDoctor(doctor.id), setPrice(doctor.fees))}
-                                    className={`flex items-center p-4 border rounded-lg transition-colors ${selectedDoctor === doctor.id.toString() ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"}`}
-                                >
-                                    <img src={doctor.image} alt={doctor.name} className="w-20 h-20 rounded-full object-cover mr-4" />
-                                    <div className="text-left">
-                                        <h3 className="font-semibold text-gray-800 mb-3">{doctor.name}</h3>
-                                        <p className="text-blue-600 mb-3">{doctor.speciality}</p>
-                                        <p className="text-gray-600 mb-3">Giá: {Number(doctor.fees).toLocaleString("vi-VN")} vnđ</p>
-                                    </div>
-                                </button>
-                            ))}
+                        {doctorData.filter((doc) => doc.speciality === selectedDepartment).length === 0 ? (
+                            <p className="text-red-400 col-span-full text-lg">Không có bác sĩ cho chuyên khoa này.</p>
+                        ) : (
+                            doctorData
+                                .filter((doc) => doc.speciality === selectedDepartment)
+                                .map((doctor) => (
+                                    <button
+                                        key={doctor.id}
+                                        onClick={() => {
+                                            setSelectedDoctor(doctor.id);
+                                            setPrice(doctor.fees);
+                                            getAppointmentByDoctorId(doctor.id);
+                                        }}
+                                        className={`flex items-center p-4 border rounded-lg transition-colors ${selectedDoctor === doctor.id.toString() ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"}`}
+                                    >
+                                        <img src={doctor.image} alt={doctor.name} className="w-20 h-20 rounded-full object-cover mr-4" />
+                                        <div className="text-left">
+                                            <h3 className="font-semibold text-gray-800 mb-3">{doctor.name}</h3>
+                                            <p className="text-blue-600 mb-3">{doctor.speciality}</p>
+                                            <p className="text-gray-600 mb-3">Giá: {Number(doctor.fees).toLocaleString("vi-VN")} vnđ</p>
+                                        </div>
+                                    </button>
+                                ))
+                        )}
                     </div>
+
                     <div className="space-y-6">
                         <div>
                             <label className="block text-lg font-medium text-gray-700 mb-2">Chọn ngày khám</label>
@@ -126,7 +198,7 @@ export function BookingPage() {
                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">Chọn giờ khám</label>
                                 <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                                    {timeSlots.map((time) => (
+                                    {availableTimeSlots.map((time) => (
                                         <button key={time} onClick={() => setSelectedTime(time)} className={`px-4 py-2 border rounded-md text-sm ${selectedTime === time ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:border-blue-500"}`}>
                                             {time}
                                         </button>
@@ -145,11 +217,11 @@ export function BookingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên</label>
-                            <input type="text" required value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="text" value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
-                            <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -157,7 +229,7 @@ export function BookingPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
-                            <input type="date" required value={dob} onChange={(e) => setDob(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
@@ -179,6 +251,16 @@ export function BookingPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Triệu chứng</label>
                         <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={4} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mô tả triệu chứng của bạn" />
                     </div>
+                    {currentStep === 2 && (
+                        <div className="flex justify-between pt-4">
+                            <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
+                                Quay lại
+                            </button>
+                            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
+                                Đặt lịch khám
+                            </button>
+                        </div>
+                    )}
                 </form>
             );
         }
@@ -271,7 +353,7 @@ export function BookingPage() {
                     </div>
                     {renderStepContent()}
                 </div>
-                {currentStep < steps.length - 1 && (
+                {currentStep < steps.length - 1 && currentStep !== 2 && (
                     <div className="flex justify-between">
                         <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
                             Quay lại

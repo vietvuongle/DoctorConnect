@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeftIcon, SearchIcon, FilterIcon, PrinterIcon, DownloadIcon, ChevronDownIcon, FileTextIcon, CalendarIcon, UserIcon } from "lucide-react";
-import { DoctorContext } from "../../context/DoctorContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AdminContext } from "../../context/AdminContext";
 
 const ViewMedicalRecord = () => {
-    const { backendUrl, dToken, formatDateHeader } = useContext(DoctorContext);
-    const { doctorData } = useContext(AdminContext);
+    const { backendUrl, aToken, formatDateHeader, doctorData } = useContext(AdminContext);
 
     console.log("doctorData", doctorData);
 
@@ -71,7 +69,7 @@ const ViewMedicalRecord = () => {
         try {
             const url = backendUrl + `/api/medicalRecords/getRecord/${patientId}`;
             let headers = {
-                Authorization: "Bearer " + dToken,
+                Authorization: "Bearer " + aToken,
             };
             const { data } = await axios.get(url, {
                 headers: headers,
@@ -83,7 +81,7 @@ const ViewMedicalRecord = () => {
 
     const getUserByUserId = async (patientId) => {
         try {
-            let headers = { Authorization: "Bearer " + dToken };
+            let headers = { Authorization: "Bearer " + aToken };
             const { data } = await axios.get(`${backendUrl}/api/doctor/getUser/${patientId}`, {
                 headers,
             });
@@ -102,11 +100,11 @@ const ViewMedicalRecord = () => {
         if (patientId) {
             getUserByUserId(patientId);
         }
-    }, [patientId, dToken]);
+    }, [patientId, aToken]);
 
     useEffect(() => {
         getMedicalRecord(patientId);
-    }, [patientId, dToken]);
+    }, [patientId, aToken]);
 
     return (
         <div className="min-h-screen bg-gray-100 py-8 w-full">

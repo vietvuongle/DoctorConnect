@@ -55,6 +55,37 @@ const AdminContextProvider = (props) => {
         }
     };
 
+    const calculateAge = (dobString) => {
+        const dob = new Date(dobString);
+        const today = new Date();
+
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        return age;
+    };
+
+    const formatDateHeader = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // tháng bắt đầu từ 0
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
+    function removeVietnameseTones(str) {
+        return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D");
+    }
+
     const value = {
         backendUrl,
         aToken,
@@ -65,6 +96,9 @@ const AdminContextProvider = (props) => {
         appointmentData,
         getDepartment,
         getDoctorData,
+        formatDateHeader,
+        calculateAge,
+        removeVietnameseTones,
     };
 
     useEffect(() => {

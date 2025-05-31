@@ -11,7 +11,6 @@ import Home from "./pages/admin/Home";
 import HomeDoctor from "./pages/doctor/Home";
 import AddDoctor from "./pages/admin/AddDoctor";
 import { Departments } from "./pages/admin/Departments";
-import ListDoctor from "./pages/admin/ListDoctor";
 import Dashboard from "./pages/doctor/DashBoard";
 import AdminDashboard from "./pages/Test";
 import Schedule from "./pages/admin/Schedule";
@@ -21,6 +20,8 @@ import Setting from "./pages/admin/Setting";
 import DoctorDetail from "./pages/admin/DoctorDetail";
 import CreateMedicalRecord from "./pages/doctor/CreateMedicalRecord";
 import ViewMedicalRecord from "./pages/doctor/ViewMedicalRecord";
+import ViewAdminMedicalRecord from "./pages/admin/ViewMedicalRecord";
+import ChangePassword from "./pages/doctor/ChangePassword";
 
 function App() {
     const { aToken } = useContext(AdminContext);
@@ -41,12 +42,14 @@ function App() {
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/schedule" element={<Schedule />} />
                     <Route path="/admin/patient" element={<Patient />} />
+                    <Route path="/admin/patient/:patientId" element={<ViewAdminMedicalRecord />} />
                     <Route path="/admin/setting" element={<Setting />} />
 
                     {/* Doctor */}
 
                     <Route path="/doctor/dashboard" element={<Dashboard />} />
                     <Route path="/doctor/home" element={<HomeDoctor />} />
+                    <Route path="/doctor/change-password" element={<ChangePassword />} />
                     <Route path="/doctor/patient" element={<PatientOfDoctor />} />
                     <Route path="/doctor/patient/:patientId" element={<ViewMedicalRecord />} />
                     <Route path="/doctor/view-medical" element={<ViewMedicalRecord />} />
