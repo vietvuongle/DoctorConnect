@@ -13,6 +13,8 @@ const AppContextProvider = (props) => {
     const [doctorData, setDoctorData] = useState([]);
     const [allUserData, setAllUserData] = useState([]);
 
+    const [userProfile, setUserProfile] = useState({});
+
     const [appointmentData, setAppointmentData] = useState([]);
 
     const getAllUser = async () => {
@@ -77,6 +79,29 @@ const AppContextProvider = (props) => {
         }
     };
 
+    const getUserProfile = async () => {
+        try {
+            const url = backendUrl + "/api/user/profile";
+            let headers = {
+                Authorization: "Bearer " + token,
+            };
+            const { data } = await axios.get(url, {
+                headers: headers,
+            });
+
+            if (data !== null) {
+                setUserProfile(data.result);
+                console.log("userprofile", data.result);
+
+                localStorage.setItem("userId", data.result._id);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            console.error("Lỗi khi gọi API user profile:", error.message);
+        }
+    };
+
     const formatDateHeader = (dateString) => {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, "0");
@@ -96,6 +121,8 @@ const AppContextProvider = (props) => {
         formatDateHeader,
         getAppointments,
         allUserData,
+        userProfile,
+        getUserProfile,
     };
 
     useEffect(() => {
@@ -107,6 +134,7 @@ const AppContextProvider = (props) => {
     useEffect(() => {
         if (token) {
             getAppointments();
+            getUserProfile();
         }
     }, [token]);
 

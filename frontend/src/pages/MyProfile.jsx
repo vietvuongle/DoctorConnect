@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
+import { toast } from "react-toastify";
 
 const MyProfile = () => {
-    const { token, backendUrl } = useContext(AppContext);
+    const { token, backendUrl, getUserProfile } = useContext(AppContext);
+
     const [userProfile, setUserProfile] = useState({});
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
@@ -22,7 +22,7 @@ const MyProfile = () => {
     const [errorMessage, setErrorMessage] = useState(""); // To show error messages
 
     // Get user profile
-    const getUserProfile = async () => {
+    const getProfile = async () => {
         try {
             const { data } = await axios.get(backendUrl + "/api/user/profile", {
                 headers: { Authorization: `Bearer ${token}` },
@@ -56,17 +56,20 @@ const MyProfile = () => {
         if (image) formData.append("image", image); // Add image if present
 
         try {
-            const response = await axios.put(backendUrl + "/api/user/get-profile", formData, {
+            const response = await axios.put(backendUrl + "/api/user/update-profile", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setUserProfile(response.data); // Update user profile state with the response
-            alert("Thông tin cá nhân đã được cập nhật!");
+            if (response.data !== null) {
+                getUserProfile();
+                setUserProfile(response.data); // Update user profile state with the response
+                toast.success("Thông tin cá nhân đã được cập nhật!");
+            }
         } catch (error) {
             console.error("Error updating user profile:", error.message);
-            alert("Cập nhật thông tin thất bại!");
+            toast.error("Cập nhật thông tin thất bại!");
         }
     };
 
@@ -75,25 +78,7 @@ const MyProfile = () => {
         const file = e.target.files[0];
         if (file) {
             setImage(file);
-            setImagePreview(URL.createObjectURL(file)); // Preview the image
-
-            // Optionally, upload the image to a service like Cloudinary
-            const formData = new FormData();
-            formData.append("file", file);
-
-            try {
-                const uploadResponse = await axios.post(backendUrl + "/api/user/uploadImage", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const uploadedImageUrl = uploadResponse.data.url;
-                setImagePreview(uploadedImageUrl); // Set the image preview with the URL
-            } catch (error) {
-                console.error("Error uploading image:", error.message);
-                alert("Có lỗi xảy ra khi tải ảnh lên.");
-            }
+            setImagePreview(URL.createObjectURL(file));
         }
     };
 
@@ -119,7 +104,7 @@ const MyProfile = () => {
                 }
             );
 
-            alert("Mật khẩu đã được thay đổi thành công!");
+            toast.success("Đổi mật khẩu thành công");
             // Optionally clear the password fields after success
             setCurrentPassword("");
             setNewPassword("");
@@ -142,7 +127,7 @@ const MyProfile = () => {
     };
 
     useEffect(() => {
-        getUserProfile(); // Fetch user profile when component mounts
+        getProfile(); // Fetch user profile when component mounts
     }, []);
 
     return (

@@ -1,39 +1,8 @@
-import React, { useContext, useEffect } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { AppContext } from "../context/AppContext";
+
 export function HeroSection() {
     const navigate = useNavigate();
-    const { token, backendUrl } = useContext(AppContext);
-
-    const getUserProfile = async () => {
-        try {
-            const url = backendUrl + "/api/user/profile";
-            let headers = {
-                Authorization: "Bearer " + token,
-            };
-            const { data } = await axios.get(url, {
-                headers: headers,
-            });
-
-            console.log("data", data);
-
-            if (data !== null) {
-                localStorage.setItem("userId", data.result._id);
-            } else {
-                toast.error("Error");
-            }
-        } catch (error) {
-            console.error("Lỗi khi gọi API user profile:", error.message);
-        }
-    };
-
-    useEffect(() => {
-        if (token) {
-            getUserProfile();
-        }
-    }, []);
 
     return (
         <section className="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-16 md:py-24">
