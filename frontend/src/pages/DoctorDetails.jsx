@@ -21,7 +21,7 @@ export function DoctorDetails() {
     const [symptoms, setSymptoms] = useState("");
 
     // Giá khám có 3 lựa chọn, mặc định là phí bác sĩ nếu có, else 100000
-    const [price, setPrice] = useState(doctorData.find((d) => d.id === id)?.fees || "100000");
+    // const [price, setPrice] = useState(doctorData.find((d) => d.id === id)?.fees || "100000");
 
     const doctor = doctorData.find((d) => d.id === id);
 
@@ -71,7 +71,7 @@ export function DoctorDetails() {
                 try {
                     const errorData = await response.json();
                     if (errorData.message) errorMessage = errorData.message;
-                } catch {}
+                } catch { }
                 throw new Error(errorMessage);
             }
 
@@ -226,13 +226,14 @@ export function DoctorDetails() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-gray-700 font-medium mb-1">Chọn mức phí khám:</label>
-                                        <select className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value={price} onChange={(e) => setPrice(e.target.value)}>
-                                            <option value="100000">100,000</option>
-                                            <option value="200000">200,000</option>
-                                            <option value="400000">400,000</option>
-                                        </select>
+                                        <label className="block text-gray-700 font-medium mb-1">Chi phí khám:</label>
+                                        <p className="p-3 bg-gray-100 rounded-xl">
+                                            {doctor.fees
+                                                ? doctor.fees.toLocaleString("vi-VN") + " VNĐ"
+                                                : "Đang cập nhật"}
+                                        </p>
                                     </div>
+
 
                                     <div className="col-span-2">
                                         <label className="block text-gray-700 font-medium mb-1">Lý do khám:</label>
