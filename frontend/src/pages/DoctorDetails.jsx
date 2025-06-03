@@ -1,10 +1,12 @@
 import { useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { useContext, useState } from "react";
+import { toast } from "react-toastify";
 
 export function DoctorDetails() {
     const { id } = useParams();
-    const { doctorData, userId } = useContext(AppContext);
+    const { doctorData, getAppointments } = useContext(AppContext);
+    const userId = localStorage.getItem("userId");
     console.log(id);
     const [showBooking, setShowBooking] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -20,8 +22,7 @@ export function DoctorDetails() {
     const [email, setEmail] = useState("");
     const [symptoms, setSymptoms] = useState("");
 
-    // Giá khám có 3 lựa chọn, mặc định là phí bác sĩ nếu có, else 100000
-    const [price, setPrice] = useState(doctorData.find((d) => d.id === id)?.fees || "100000");
+    const [price, setPrice] = useState(doctorData.find((d) => d.id === id)?.fees);
 
     const doctor = doctorData.find((d) => d.id === id);
 
@@ -66,14 +67,21 @@ export function DoctorDetails() {
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) {
+            if (response.data !== null) {
+                toast.success("Đăt lịch thành công")
+
+                getAppointments()
+
+            } else {
                 let errorMessage = "Đặt lịch thất bại";
                 try {
                     const errorData = await response.json();
                     if (errorData.message) errorMessage = errorData.message;
-                } catch {}
+                } catch { }
                 throw new Error(errorMessage);
             }
+
+
 
             setShowBooking(false);
             setSelectedSlot(null);
@@ -88,7 +96,6 @@ export function DoctorDetails() {
             setPhone("");
             setEmail("");
 
-            alert("Đặt lịch thành công!");
         } catch (error) {
             alert(error.message || "Có lỗi xảy ra khi đặt lịch");
         }
@@ -137,10 +144,10 @@ export function DoctorDetails() {
                                 <strong>Trường:</strong> {doctor.school || "Đang cập nhật"}
                             </p>
                             <p>
-                                <strong>Chứng chỉ:</strong> {doctor.certifications?.join(", ") || "Đang cập nhật"}
+                                <strong>Chuyên khoa:</strong> {doctor.speciality || "Đang cập nhật"}
                             </p>
                             <p>
-                                <strong>Mô tả:</strong> {doctor.description || "Đang cập nhật"}
+                                <strong>Mô tả:</strong> {doctor.about || "Đang cập nhật"}
                             </p>
                         </div>
                         <div className="text-center">
@@ -226,12 +233,14 @@ export function DoctorDetails() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-gray-700 font-medium mb-1">Chọn mức phí khám:</label>
-                                        <select className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value={price} onChange={(e) => setPrice(e.target.value)}>
-                                            <option value="100000">100,000</option>
-                                            <option value="200000">200,000</option>
-                                            <option value="400000">400,000</option>
-                                        </select>
+                                        <label className="block text-gray-700 font-medium mb-1">Phí khám:</label>
+                                        <input
+                                            type="number"
+                                            className="w-full border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={doctor.fees}
+                                            onChange={(e) => setPrice(Number(e.target.value))} // ép kiểu sang number
+                                            readOnly
+                                        />
                                     </div>
 
                                     <div className="col-span-2">

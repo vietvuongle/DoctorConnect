@@ -18,6 +18,7 @@ import OAuth2Success from "./pages/OAuth2Success ";
 import Contact from "./pages/Contact";
 import DoctorDetails from "./pages/DoctorDetails";
 import DoctorReview from "./pages/DoctorReview";
+import DepartmentDetails from "./pages/DepartmentDetails";
 
 function App() {
     const location = useLocation();
@@ -42,6 +43,8 @@ function App() {
                 <Route path="/appointment" element={<BookingPage />} />
                 <Route path="/my-appointments" element={<MyAppointments />} />
                 <Route path="/appointment/:docId" element={<Appointment />} />
+                <Route path="/department/:id" element={<DepartmentDetails />} />
+
             </Routes>
 
             {!hideHeaderFooter && <Footer />}

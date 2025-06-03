@@ -13,18 +13,17 @@ export function DepartmentDetails() {
     if (!department) {
         return (
             <>
-                <Header />
+
                 <div className="container mx-auto p-4">
                     <h2 className="text-xl font-semibold text-red-500 text-center">Không tìm thấy chuyên khoa</h2>
                 </div>
-                <Footer />
+
             </>
         );
     }
 
     return (
         <>
-            <Header />
             <div className="container mx-auto p-6 max-w-md flex flex-col items-center">
                 <img
                     src={department.iconImage}
@@ -34,7 +33,6 @@ export function DepartmentDetails() {
                 <h1 className="text-3xl font-extrabold text-gray-900 mb-4 text-center">{department.name}</h1>
                 <p className="text-gray-700 text-base leading-relaxed text-center">{department.description}</p>
             </div>
-            <Footer />
         </>
     );
 }
