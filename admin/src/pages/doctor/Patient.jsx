@@ -19,8 +19,6 @@ const Patient = () => {
         return false;
     });
 
-    console.log("completed", completedAppointments);
-
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3;
     const totalItems = completedAppointments.length;

@@ -5,6 +5,7 @@ import axios from "axios";
 import { AdminContext } from "../../context/AdminContext";
 import { PlusIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import TiptapEditor from "../../components/TiptapEditor";
 
 const AddDoctor = () => {
     const [isAddingNew, setIsAddingNew] = useState(false);
@@ -23,7 +24,7 @@ const AddDoctor = () => {
     const [degree, setDegree] = useState("");
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
-    const [sex, setSex] = useState("");
+    const [sex, setSex] = useState("Nam");
     const [school, setSchool] = useState("");
 
     const { backendUrl, aToken, departmentData, doctorData } = useContext(AdminContext);
@@ -77,7 +78,7 @@ const AddDoctor = () => {
             } else {
                 toast.error("Thêm bác sĩ thất bại!");
             }
-        } catch (error) { }
+        } catch (error) {}
     };
 
     const handleFeesChange = (e) => {
@@ -194,7 +195,7 @@ const AddDoctor = () => {
 
                         <div>
                             <p className="pt-4 pb-2">Mô Tả Khác</p>
-                            <textarea onChange={(e) => setAbout(e.target.value)} value={about} className="w-full px-4 pt-2 border rounded" placeholder="Viết những mô tả khác của bác sĩ" rows={5} required />
+                            <TiptapEditor value={about} onChange={setAbout} />
                         </div>
 
                         <button type="submit" className="bg-primary px-10 py-3 mt-4 text-white rounded-full">

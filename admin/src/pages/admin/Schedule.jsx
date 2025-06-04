@@ -26,6 +26,23 @@ const Schedule = () => {
         }
     };
 
+    const cancelAppointment = async (id) => {
+        try {
+            const { data } = await axios.put(
+                `${backendUrl}/api/doctor/appointment/cancel/${id}`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${aToken}` },
+                }
+            );
+            toast.success("Đã hủy thành công");
+            getDepartment(); // load lại danh sách
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || "Hủy thất bại");
+        }
+    };
+
     return (
         <div className="mt-5 mr-2 overflow-x-auto max-w-full">
             <div className="flex justify-between items-center mb-6">
@@ -103,7 +120,11 @@ const Schedule = () => {
                                                 Xác nhận
                                             </button>
                                         )}
-                                        {!appointment.confirm && <button className="text-red-600 hover:text-red-900">Hủy</button>}
+                                        {!appointment.confirm && (
+                                            <button onClick={() => cancelAppointment(appointment._id)} className="text-red-600 hover:text-red-900">
+                                                Hủy
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

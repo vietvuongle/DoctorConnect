@@ -70,22 +70,22 @@ const Home = () => {
         }
     };
 
-    const compleAppointment = async (id) => {
-        try {
-            const { data } = await axios.put(
-                `${backendUrl}/api/doctor/appointment/completed/${id}`,
-                {},
-                {
-                    headers: { Authorization: `Bearer ${dToken}` },
-                }
-            );
-            toast.success("Đã hoàn thành lịch khám");
-            getAllAppointment(); // load lại danh sách
-        } catch (err) {
-            console.error(err);
-            toast.error(err.response?.data?.message || "Xác nhận thất bại");
-        }
-    };
+    // const compleAppointment = async (id) => {
+    //     try {
+    //         const { data } = await axios.put(
+    //             `${backendUrl}/api/doctor/appointment/completed/${id}`,
+    //             {},
+    //             {
+    //                 headers: { Authorization: `Bearer ${dToken}` },
+    //             }
+    //         );
+    //         toast.success("Đã hoàn thành lịch khám");
+    //         getAllAppointment(); // load lại danh sách
+    //     } catch (err) {
+    //         console.error(err);
+    //         toast.error(err.response?.data?.message || "Xác nhận thất bại");
+    //     }
+    // };
 
     return (
         <div className="space-y-6 w-full my-5 mx-5">
@@ -165,25 +165,12 @@ const Home = () => {
                                             {appointment.payment && !appointment.completed && (
                                                 <button
                                                     onClick={() => {
-                                                        navigate(`/doctor/create-medical/${appointment.userId}`);
+                                                        navigate(`/doctor/create-medical/${appointment.userId}/${appointment._id}`);
                                                         scrollTo(0, 0);
                                                     }}
                                                     className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                                 >
                                                     Tạo bệnh án
-                                                </button>
-                                            )}
-                                            {!appointment.completed && appointment.payment && (
-                                                <button
-                                                    onClick={() => {
-                                                        const confirmComplete = window.confirm("Bạn có chắc chắn muốn đánh dấu cuộc hẹn này là 'Hoàn thành'?");
-                                                        if (confirmComplete) {
-                                                            compleAppointment(appointment._id);
-                                                        }
-                                                    }}
-                                                    className="inline-flex items-center justify-center w-[105px] px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-full text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                                >
-                                                    Hoàn thành
                                                 </button>
                                             )}
 

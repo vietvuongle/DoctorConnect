@@ -6,11 +6,8 @@ import { AdminContext } from "../../context/AdminContext";
 const Home = () => {
     const { doctorData, appointmentData } = useContext(AdminContext);
 
-    const seenUserIds = new Set();
-
     const completedAppointments = appointmentData.filter((appointment) => {
-        if (appointment.completed && !seenUserIds.has(appointment.userId)) {
-            seenUserIds.add(appointment.userId);
+        if (appointment.completed) {
             return true;
         }
         return false;

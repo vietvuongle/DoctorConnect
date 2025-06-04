@@ -4,6 +4,7 @@ import { ArrowLeftIcon, SaveIcon, UserIcon, MailIcon, CircleDollarSign, PhoneIco
 import { AdminContext } from "../../context/AdminContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import TiptapEditor from "../../components/TiptapEditor";
 const DoctorDetail = () => {
     const { doctorId } = useParams();
 
@@ -69,10 +70,6 @@ const DoctorDetail = () => {
             formData.append("school", editForm.school);
             if (editForm.image instanceof File) {
                 formData.append("image", editForm.image);
-            }
-
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
             }
 
             const { data } = await axios.post(backendUrl + "/api/admin/update-doctor", formData, {
@@ -311,18 +308,14 @@ const DoctorDetail = () => {
                                     <div className="mt-6">
                                         <div className="flex mb-2 text-lg items-center font-medium text-gray-700">
                                             <FileTextIcon className="w-5 h-5 inline-block mr-2" />
-                                            <p>Giới thiệu</p>
+                                            <p className="text-2xl">Giới thiệu</p>
                                         </div>
                                         {isEditing ? (
-                                            <textarea
-                                                name="about"
-                                                value={editForm.about}
-                                                onChange={(e) => setEditForm((prev) => ({ ...prev, about: e.target.value }))}
-                                                rows={4}
-                                                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
-                                            />
+                                            <div>
+                                                <TiptapEditor value={editForm.about} onChange={(html) => setEditForm((prev) => ({ ...prev, about: html }))} />
+                                            </div>
                                         ) : (
-                                            <p className="mt-1 text-gray-600">{docInfo.about}</p>
+                                            <div dangerouslySetInnerHTML={{ __html: docInfo.about }} />
                                         )}
                                     </div>
                                 </div>

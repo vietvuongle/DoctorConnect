@@ -4,8 +4,9 @@ import { ArrowLeftIcon, SearchIcon, CalendarIcon, ClockIcon, FilterIcon } from "
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+
 const MyAppointments = () => {
-    const { appointmentData, doctorData, formatDateHeader, token, backendUrl, getAppointments } = useContext(AppContext);
+    const { appointmentData, doctorData, formatDateHeader, token, backendUrl, getAppointments, handleSmoothScroll } = useContext(AppContext);
 
     const navigate = useNavigate();
 
@@ -37,6 +38,10 @@ const MyAppointments = () => {
 
             // Kiểm tra field tồn tại và so sánh
             return field in appointment && appointment[field] === boolValue;
+        })
+        .sort((a, b) => {
+            // Sắp xếp theo slotDate (ascending)
+            return new Date(b.slotDate) - new Date(a.slotDate);
         });
 
     function getDoctorNameById(doctorId, doctorData) {
@@ -159,11 +164,11 @@ const MyAppointments = () => {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div>
-                                                            <div>{!appointment.confirm && !appointment.cancelled && !appointment.payment && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-black">Chờ xác nhận</span>}</div>
-                                                            <div>{appointment.confirm && !appointment.cancelled && !appointment.payment && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-600 text-white">Đã xác nhận</span>}</div>
-                                                            <div>{appointment.payment && !appointment.completed && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-300 text-black">Đã thanh toán</span>}</div>
-                                                            <div>{appointment.completed && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 text-white">Đã hoàn thành</span>}</div>
-                                                            <div>{appointment.cancelled && <span className="flex justify-center px-3 py-1 w-20 ml-1.5 text-xs leading-5 font-semibold rounded-full bg-red-600 text-white">Đã hủy</span>}</div>
+                                                            <div>{!appointment.confirm && !appointment.cancelled && !appointment.payment && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full w-[98px] bg-gray-200 text-black">Chờ xác nhận</span>}</div>
+                                                            <div>{appointment.confirm && !appointment.cancelled && !appointment.payment && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full w-[98px] bg-blue-600 text-white">Đã xác nhận</span>}</div>
+                                                            <div>{appointment.payment && !appointment.completed && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-300 w-[98px] text-black">Đã thanh toán</span>}</div>
+                                                            <div>{appointment.completed && <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 w-[98px] text-white">Đã hoàn thành</span>}</div>
+                                                            <div>{appointment.cancelled && <span className="flex justify-center px-3 py-1 ml-1.5 text-xs leading-5 font-semibold rounded-full w-[98px] bg-red-600 text-white">Đã hủy</span>}</div>
                                                         </div>
                                                     </td>
                                                     <td className="flex flex-col gap-2 justify-center items-center py-2">
@@ -179,7 +184,7 @@ const MyAppointments = () => {
                                                         )}
                                                         {appointment.completed && (
                                                             <button
-                                                                onClick={() => navigate(`/review-doctor/${appointment.doctorId}/${appointment._id}`)}
+                                                                onClick={() => (navigate(`/review-doctor/${appointment.doctorId}/${appointment._id}`), handleSmoothScroll())}
                                                                 className="text-sm text-gray-900 text-center sm:min-w-10 w-36 py-2 my-7  border rounded cursor-pointer hover:bg-slate-300 transition-all duration-300"
                                                             >
                                                                 Đánh giá

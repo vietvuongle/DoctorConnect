@@ -3,9 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeftIcon, StarIcon, ThumbsUpIcon, ThumbsDownIcon, FilterIcon, SearchIcon, UserIcon, CalendarIcon } from "lucide-react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const DoctorReview = () => {
-    const { doctorData, backendUrl, token, allUserData, appointmentData } = useContext(AppContext);
+    const { doctorData, backendUrl, token, allUserData, appointmentData, getAppointments, getTopReview, formatDateHeader } = useContext(AppContext);
 
     const [allReview, setAllReview] = useState([]);
     const [rating, setRating] = useState(0);
@@ -64,21 +65,20 @@ const DoctorReview = () => {
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
-
+        if (rating === 0 || !comment) {
+            toast.warning("Vui lòng nhập đầy đủ thông tin");
+            return;
+        }
         try {
             const { data } = await axios.post(backendUrl + "/api/user/review", { rating, comment, doctorId, userId, appointmentId }, { headers: { Authorization: `Bearer ${token}` } });
             if (data !== null) {
+                toast.success("Đánh giá thành công");
+                getAppointments();
+                getTopReview();
                 getAllDoctorReviewBydoctorId(doctorId);
             }
         } catch (error) {}
 
-        console.log({
-            rating,
-            comment,
-            doctorId,
-            userId,
-        });
-        // Reset form
         setRating(0);
         setComment("");
     };
@@ -173,7 +173,7 @@ const DoctorReview = () => {
                         </div>
                     </div>
                     {/* Write Review Section */}
-                    {isReview && (
+                    {!isReview && (
                         <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
                             <div className="p-6">
                                 <h3 className="text-lg font-medium text-gray-900 mb-4">Viết đánh giá của bạn</h3>
@@ -193,7 +193,7 @@ const DoctorReview = () => {
                                     <div className="mb-4">
                                         <textarea rows={4} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Chia sẻ trải nghiệm của bạn..." value={comment} onChange={(e) => setComment(e.target.value)}></textarea>
                                     </div>
-                                    <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700" disabled={!rating || !comment}>
+                                    <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-blue-700">
                                         Gửi đánh giá
                                     </button>
                                 </form>

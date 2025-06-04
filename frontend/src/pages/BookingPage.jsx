@@ -1,8 +1,9 @@
 import React, { useContext, useState } from "react";
 import { Calendar as CalendarIcon, Clock as ClockIcon, ChevronRight as ChevronRightIcon, CheckCircle as CheckCircleIcon } from "lucide-react";
 import { AppContext } from "../context/AppContext";
-import { toast } from "react-toastify";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const steps = [
     { title: "Chọn chuyên khoa", description: "Chọn chuyên khoa phù hợp với nhu cầu khám" },
@@ -12,12 +13,12 @@ const steps = [
 ];
 
 export function BookingPage() {
-    const { departmentData, doctorData, backendUrl, token } = useContext(AppContext);
+    const { departmentData, doctorData, backendUrl, token, getAppointments } = useContext(AppContext);
+    const navigate = useNavigate();
 
     const userId = localStorage.getItem("userId");
 
     const [appointmentWithDoctor, setAppointmentWithDoctor] = useState([]);
-
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [selectedDoctor, setSelectedDoctor] = useState("");
@@ -27,63 +28,54 @@ export function BookingPage() {
     const [patientName, setPatientName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [gender, setGender] = useState("Nam");
+    const [gender, setGender] = useState("");
     const [dob, setDob] = useState("");
     const [price, setPrice] = useState(0);
+    const [errors, setErrors] = useState({}); // State to track validation errors
 
     const timeSlots = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"];
 
     const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
-    const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+    const handleBack = () => {
+        setErrors({}); // Clear errors when going back
+        setCurrentStep((prev) => Math.max(prev - 1, 0));
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (currentStep === 1) {
+            if (!selectedDoctor) newErrors.selectedDoctor = "Vui lòng chọn bác sĩ.";
+            if (!selectedDate) newErrors.selectedDate = "Vui lòng chọn ngày khám.";
+            if (!selectedTime) newErrors.selectedTime = "Vui lòng chọn giờ khám.";
+        }
+
+        if (currentStep === 2) {
+            if (!patientName.trim()) newErrors.patientName = "Vui lòng nhập họ tên bệnh nhân.";
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phone)) newErrors.phone = "Số điện thoại không hợp lệ. Phải có 10 chữ số và bắt đầu bằng số 0.";
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) newErrors.email = "Email không hợp lệ.";
+            const today = new Date();
+            const dobDate = new Date(dob);
+            if (!dob || dobDate > today) newErrors.dob = "Ngày sinh không hợp lệ.";
+            if (!gender) newErrors.gender = "Vui lòng chọn giới tính.";
+            if (!reason.trim()) newErrors.reason = "Vui lòng nhập lý do khám.";
+            if (!price || Number(price) <= 0) newErrors.price = "Giá khám không hợp lệ.";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Return true if no errors
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!validateForm()) {
+            return; // Stop if validation fails
+        }
+
         try {
-            if (!selectedDoctor || !selectedTime || !selectedDate) {
-                toast.warning("Vui lòng chọn đầy đủ thông tin bác sĩ, ngày và giờ khám.");
-                return;
-            }
-
-            if (!patientName.trim()) {
-                toast.warning("Vui lòng nhập họ tên bệnh nhân.");
-                return;
-            }
-
-            const phoneRegex = /^0\d{9}$/;
-            if (!phoneRegex.test(phone)) {
-                toast.warning("Số điện thoại không hợp lệ. Phải có 10 chữ số và bắt đầu bằng số 0.");
-                return;
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                toast.warning("Email không hợp lệ.");
-                return;
-            }
-
-            const today = new Date();
-            const dobDate = new Date(dob);
-            if (!dob || dobDate > today) {
-                toast.warning("Ngày sinh không hợp lệ.");
-                return;
-            }
-
-            if (!gender) {
-                toast.warning("Vui lòng chọn giới tính.");
-                return;
-            }
-
-            if (!reason.trim()) {
-                toast.warning("Vui lòng nhập lý do khám.");
-                return;
-            }
-
-            if (!price || Number(price) <= 0) {
-                toast.warning("Giá khám không hợp lệ.");
-                return;
-            }
-
             const formData = new FormData();
             formData.append("patientName", patientName);
             formData.append("phone", phone);
@@ -96,42 +88,43 @@ export function BookingPage() {
             formData.append("doctorId", selectedDoctor);
             formData.append("price", Number(price));
             formData.append("userId", userId);
-            console.log([...formData]);
-            console.log("Token: ", token);
 
             let headers = {
                 Authorization: "Bearer " + token,
             };
 
-            const response = await axios.post(backendUrl + "/api/user/appointment", formData, { headers: headers });
-            console.log("Response: ", response);
-
+            const response = await axios.post(backendUrl + "/api/user/appointment", formData, { headers });
             const { code, result } = response.data;
 
             if (code === 1000 && result) {
-                toast.success("Đăng kí thành công");
-
+                getAppointments();
+                setErrors({}); // Clear errors on success
+                toast.success("Đặt lịch thành công");
                 setCurrentStep(currentStep + 1);
             } else {
-                toast.error("Đăng kí thất bại");
+                setErrors({ general: "Đặt lịch thất bại. Vui lòng thử lại." });
             }
         } catch (error) {
-            toast.error("Đặt lịch khám thất bại");
+            setErrors({ general: "Đặt lịch khám thất bại. Vui lòng kiểm tra kết nối và thử lại." });
         }
     };
 
     const getAppointmentByDoctorId = async (doctorId) => {
         try {
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+
             const url = backendUrl + `/api/user/appointments/${doctorId}`;
             let headers = {
                 Authorization: "Bearer " + token,
             };
-            const { data } = await axios.get(url, {
-                headers: headers,
-            });
-
+            const { data } = await axios.get(url, { headers });
             setAppointmentWithDoctor(data);
-        } catch (error) {}
+        } catch (error) {
+            setErrors({ general: "Không thể tải lịch bác sĩ. Vui lòng thử lại." });
+        }
     };
 
     const bookedTimes = appointmentWithDoctor.filter((app) => app.doctorId === selectedDoctor && app.slotDate === selectedDate).map((app) => app.slotTime);
@@ -147,6 +140,7 @@ export function BookingPage() {
                             key={dept.id}
                             onClick={() => {
                                 setSelectedDepartment(dept.name);
+                                setErrors({}); // Clear errors
                                 handleNext();
                             }}
                             className={`p-4 border rounded-lg text-left transition-colors ${selectedDepartment === dept.id ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"}`}
@@ -162,6 +156,7 @@ export function BookingPage() {
         if (currentStep === 1) {
             return (
                 <div>
+                    {errors.general && <p className="text-red-500 mb-4">{errors.general}</p>}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         {doctorData.filter((doc) => doc.speciality === selectedDepartment).length === 0 ? (
                             <p className="text-red-400 col-span-full text-lg">Không có bác sĩ cho chuyên khoa này.</p>
@@ -175,6 +170,7 @@ export function BookingPage() {
                                             setSelectedDoctor(doctor.id);
                                             setPrice(doctor.fees);
                                             getAppointmentByDoctorId(doctor.id);
+                                            setErrors({}); // Clear errors
                                         }}
                                         className={`flex items-center p-4 border rounded-lg transition-colors ${selectedDoctor === doctor.id.toString() ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"}`}
                                     >
@@ -188,24 +184,42 @@ export function BookingPage() {
                                 ))
                         )}
                     </div>
-
                     <div className="space-y-6">
                         <div>
                             <label className="block text-lg font-medium text-gray-700 mb-2">Chọn ngày khám</label>
-                            <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} min={new Date().toISOString().split("T")[0]} className="w-[25%] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => {
+                                    setSelectedDate(e.target.value);
+                                    setErrors((prev) => ({ ...prev, selectedDate: "" }));
+                                }}
+                                min={new Date().toISOString().split("T")[0]}
+                                className={`w-[25%] px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.selectedDate ? "border-red-500" : "border-gray-300"}`}
+                            />
+                            {errors.selectedDate && <p className="text-red-500 text-sm mt-1">{errors.selectedDate}</p>}
                         </div>
                         {selectedDate && (
                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">Chọn giờ khám</label>
                                 <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                                     {availableTimeSlots.map((time) => (
-                                        <button key={time} onClick={() => setSelectedTime(time)} className={`px-4 py-2 border rounded-md text-sm ${selectedTime === time ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:border-blue-500"}`}>
+                                        <button
+                                            key={time}
+                                            onClick={() => {
+                                                setSelectedTime(time);
+                                                setErrors((prev) => ({ ...prev, selectedTime: "" }));
+                                            }}
+                                            className={`px-4 py-2 border rounded-md text-sm ${selectedTime === time ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:border-blue-500"}`}
+                                        >
                                             {time}
                                         </button>
                                     ))}
                                 </div>
+                                {errors.selectedTime && <p className="text-red-500 text-sm mt-2">{errors.selectedTime}</p>}
                             </div>
                         )}
+                        {errors.selectedDoctor && <p className="text-red-500 text-sm mt-2">{errors.selectedDoctor}</p>}
                     </div>
                 </div>
             );
@@ -213,55 +227,128 @@ export function BookingPage() {
 
         if (currentStep === 2) {
             return (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên</label>
-                            <input type="text" value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
-                            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
-                            <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
-                            <div className="relative w-full">
-                                <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full appearance-none px-4 py-2 pr-10 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700">
-                                    <option value="Nam">Nam</option>
-                                    <option value="Nữ">Nữ</option>
-                                    <option value="other">Khác</option>
-                                </select>
-
-                                {/* Icon mũi tên custom */}
-                                <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
+                <div>
+                    {errors.general && <p className="text-red-500 mb-4">{errors.general}</p>}
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm mb-6">
+                        <div className="flex items-start gap-3">
+                            <svg className="h-6 w-6 text-blue-500 mt-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 className="text-lg font-semibold text-blue-800 mb-1">LƯU Ý</h3>
+                                <p className="text-gray-700 text-sm">Thông tin anh/chị cung cấp sẽ được sử dụng làm hồ sơ khám bệnh, khi điền thông tin anh/chị vui lòng:</p>
+                                <ul className="list-disc list-inside text-gray-700 text-sm mt-1 space-y-1">
+                                    <li>
+                                        Ghi rõ họ và tên, viết hoa những chữ cái đầu tiên, ví dụ: <span className="font-medium">Trần Văn Phú</span>
+                                    </li>
+                                    <li>Điền đầy đủ, đúng và vui lòng kiểm tra lại thông tin trước khi ấn "Đặt lịch khám"</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Triệu chứng</label>
-                        <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={4} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mô tả triệu chứng của bạn" />
-                    </div>
-                    {currentStep === 2 && (
-                        <div className="flex justify-between pt-4">
-                            <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
-                                Quay lại
-                            </button>
-                            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
-                                Đặt lịch khám
-                            </button>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên</label>
+                                <input
+                                    type="text"
+                                    value={patientName}
+                                    onChange={(e) => {
+                                        setPatientName(e.target.value);
+                                        setErrors((prev) => ({ ...prev, patientName: "" }));
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.patientName ? "border-red-500" : "border-gray-300"}`}
+                                />
+                                {errors.patientName && <p className="text-red-500 text-sm mt-1">{errors.patientName}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                                <input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={(e) => {
+                                        setPhone(e.target.value);
+                                        setErrors((prev) => ({ ...prev, phone: "" }));
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? "border-red-500" : "border-gray-300"}`}
+                                />
+                                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        setErrors((prev) => ({ ...prev, email: "" }));
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? "border-red-500" : "border-gray-300"}`}
+                                />
+                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
+                                <input
+                                    type="date"
+                                    value={dob}
+                                    onChange={(e) => {
+                                        setDob(e.target.value);
+                                        setErrors((prev) => ({ ...prev, dob: "" }));
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.dob ? "border-red-500" : "border-gray-300"}`}
+                                />
+                                {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
+                                <div className="relative w-full">
+                                    <select
+                                        value={gender}
+                                        onChange={(e) => {
+                                            setGender(e.target.value);
+                                            setErrors((prev) => ({ ...prev, gender: "" }));
+                                        }}
+                                        className={`w-full appearance-none px-4 py-2 pr-10 bg-white border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.gender ? "border-red-500" : "border-gray-300"}`}
+                                    >
+                                        <option value="">Chọn giới tính</option>
+                                        <option value="Nam">Nam</option>
+                                        <option value="Nữ">Nữ</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                                {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+                            </div>
                         </div>
-                    )}
-                </form>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Triệu chứng</label>
+                            <textarea
+                                value={reason}
+                                onChange={(e) => {
+                                    setReason(e.target.value);
+                                    setErrors((prev) => ({ ...prev, reason: "" }));
+                                }}
+                                rows={4}
+                                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.reason ? "border-red-500" : "border-gray-300"}`}
+                                placeholder="Mô tả triệu chứng của bạn"
+                            />
+                            {errors.reason && <p className="text-red-500 text-sm mt-1">{errors.reason}</p>}
+                        </div>
+                        {currentStep === 2 && (
+                            <div className="flex justify-between pt-4">
+                                <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
+                                    Quay lại
+                                </button>
+                                <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
+                                    Đặt lịch khám
+                                </button>
+                            </div>
+                        )}
+                    </form>
+                </div>
             );
         }
 
@@ -326,8 +413,6 @@ export function BookingPage() {
     return (
         <div className="py-8 bg-gray-50 min-h-screen flex items-center justify-center px-2">
             <div className="w-full max-w-6xl">
-                {" "}
-                {/* Thay container bằng w-full và max-w-3xl */}
                 <nav className="mb-8">
                     <ol className="flex items-center w-full">
                         {steps.map((step, index) => (
@@ -361,10 +446,11 @@ export function BookingPage() {
                         <button
                             onClick={() => {
                                 if (currentStep === steps.length - 2) {
-                                    handleSubmit(new Event("submit")); // gọi hàm submit
-                                    setCurrentStep(currentStep + 1); // chuyển sang bước xác nhận
+                                    handleSubmit(new Event("submit"));
                                 } else {
-                                    handleNext();
+                                    if (validateForm()) {
+                                        handleNext();
+                                    }
                                 }
                             }}
                             disabled={(currentStep === 0 && !selectedDepartment) || (currentStep === 1 && (!selectedDoctor || !selectedDate || !selectedTime))}
