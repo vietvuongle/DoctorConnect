@@ -10,6 +10,7 @@ const AdminContextProvider = (props) => {
     const [departmentData, setDepartmentData] = useState([]);
     const [doctorData, setDoctorData] = useState([]);
     const [appointmentData, setAppointmentData] = useState([]);
+    const [clinicData, setClinicData] = useState([]);
 
     const getDoctorData = async () => {
         try {
@@ -43,10 +44,22 @@ const AdminContextProvider = (props) => {
         try {
             const { data } = await axios.get(backendUrl + "/api/admin/all-appointment", { headers: { Authorization: `Bearer ${aToken}` } });
 
-            console.log("data", data);
-
             if (data !== false) {
                 setAppointmentData(data.result);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const getAllClinic = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/admin/all-clinic", { headers: { Authorization: `Bearer ${aToken}` } });
+
+            if (data !== false) {
+                setClinicData(data.result);
             } else {
                 toast.error("Error");
             }
@@ -99,6 +112,9 @@ const AdminContextProvider = (props) => {
         formatDateHeader,
         calculateAge,
         removeVietnameseTones,
+        getAllAppointment,
+        clinicData,
+        getAllClinic,
     };
 
     useEffect(() => {
@@ -109,6 +125,7 @@ const AdminContextProvider = (props) => {
     useEffect(() => {
         if (aToken) {
             getAllAppointment();
+            getAllClinic();
         }
     }, [aToken]); // chạy mỗi khi aToken thay đổi
 

@@ -111,7 +111,7 @@ const ViewMedicalRecord = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 flex items-center justify-between">
                     <div className="flex items-center">
-                        <Link to="/doctor/patient" className="flex items-center text-blue-600 hover:text-blue-800">
+                        <Link to="/admin/patient" className="flex items-center text-blue-600 hover:text-blue-800">
                             <ArrowLeftIcon className="w-5 h-5 mr-2" />
                             Quay lại
                         </Link>

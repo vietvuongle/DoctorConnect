@@ -315,7 +315,7 @@ const DoctorDetail = () => {
                                                 <TiptapEditor value={editForm.about} onChange={(html) => setEditForm((prev) => ({ ...prev, about: html }))} />
                                             </div>
                                         ) : (
-                                            <div dangerouslySetInnerHTML={{ __html: docInfo.about }} />
+                                            <div className="font-calibri overflow-y-auto p-4 bg-gray-50 rounded-md border border-gray-200 shadow-sm tiptap-content" dangerouslySetInnerHTML={{ __html: docInfo.about }} />
                                         )}
                                     </div>
                                 </div>
@@ -330,28 +330,95 @@ const DoctorDetail = () => {
                                         </Link>
                                     </div>
                                 </div>
-                                {!isEditing && (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setIsEditing(!isEditing);
-                                            handleStartEdit();
-                                        }}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Chỉnh sửa
-                                    </button>
-                                )}
-                                {isEditing && (
-                                    <button type="submit" className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                        <SaveIcon className="w-5 h-5 mr-2" />
-                                        <p>Lưu thay đổi</p>
-                                    </button>
-                                )}
+                                <div className="flex gap-4">
+                                    {!isEditing && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsEditing(!isEditing);
+                                                handleStartEdit();
+                                            }}
+                                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                        >
+                                            Chỉnh sửa
+                                        </button>
+                                    )}
+                                    {isEditing && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsEditing(false);
+                                                }}
+                                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                                            >
+                                                Hủy
+                                            </button>
+
+                                            <button type="submit" className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                                <SaveIcon className="w-5 h-5 mr-2" />
+                                                <p>Lưu thay đổi</p>
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
+                <style>
+                    {`
+          .font-calibri {
+            font-family: 'Calibri', 'Arial', sans-serif;
+          }
+          .tiptap-content {
+            font-family: 'Calibri', 'Arial', sans-serif !important;
+            font-size: 11pt;
+            line-height: 1.15;
+            color: #2E2E2E;
+          }
+          .tiptap-content p {
+            margin: 0 0 4pt 0;
+          }
+          .tiptap-content h1 {
+            font-size: 26pt;
+            font-weight: bold;
+            margin: 22pt 0 12pt 0;
+            line-height: 1.1;
+            color: #2E2E2E;
+          }
+          .tiptap-content h2 {
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 18pt 0 10pt 0;
+            line-height: 1.1;
+            color: #2E2E2E;
+          }
+          .tiptap-content h3 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 14pt 0 8pt 0;
+            line-height: 1.1;
+            color: #2E2E2E;
+          }
+          .tiptap-content ul,
+          .tiptap-content ol {
+            padding-left: 36pt;
+            margin: 11pt 0;
+          }
+          .tiptap-content ul li,
+          .tiptap-content ol li {
+            margin-bottom: 6pt;
+            line-height: 1.15;
+          }
+          .tiptap-content ul {
+            list-style-type: disc;
+          }
+          .tiptap-content ol {
+            list-style-type: decimal;
+          }
+        `}
+                </style>
             </div>
         )
     );

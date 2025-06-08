@@ -6,8 +6,9 @@ import { AdminContext } from "../../context/AdminContext";
 import { PlusIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TiptapEditor from "../../components/TiptapEditor";
+import { ClinicContext } from "../../context/ClinicContext";
 
-const AddDoctor = () => {
+const ClinicAddDoctor = () => {
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1); // Current page state
@@ -30,6 +31,7 @@ const AddDoctor = () => {
     const [school, setSchool] = useState("");
 
     const { backendUrl, aToken, departmentData, doctorData } = useContext(AdminContext);
+    const { cToken } = useContext(ClinicContext);
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
@@ -129,7 +131,7 @@ const AddDoctor = () => {
                 </div>
 
                 {isAddingNew && (
-                    <div className="bg-white px-8 border py-8 rounded w-full max-w-5xl overflow-y-scroll">
+                    <div className="bg-white px-8 border mt-5 py-8 rounded w-full max-w-5xl overflow-y-scroll">
                         <div className="flex items-center gap-4 mb-8 text-gray-500">
                             <label htmlFor="doc-img">
                                 <img className="w-16 bg-gray-100 rounded-full cursor-pointer" src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
@@ -331,4 +333,4 @@ const AddDoctor = () => {
     );
 };
 
-export default AddDoctor;
+export default ClinicAddDoctor;

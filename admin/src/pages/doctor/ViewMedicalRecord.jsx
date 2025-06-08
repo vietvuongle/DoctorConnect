@@ -67,8 +67,6 @@ const ViewMedicalRecord = () => {
 
     const userInfomation = appointmentData.find((app) => app.userId === patientId);
 
-    console.log("userInfomation", userInfomation);
-
     const getMedicalRecord = async (patientId) => {
         try {
             const url = backendUrl + `/api/medicalRecords/getRecord/${patientId}`;

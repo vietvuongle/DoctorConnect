@@ -22,7 +22,7 @@ export function BookingPage() {
     const [currentStep, setCurrentStep] = useState(0);
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [selectedDoctor, setSelectedDoctor] = useState("");
-    const [selectedDate, setSelectedDate] = useState("");
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
     const [selectedTime, setSelectedTime] = useState("");
     const [reason, setReason] = useState("");
     const [patientName, setPatientName] = useState("");
@@ -33,7 +33,7 @@ export function BookingPage() {
     const [price, setPrice] = useState(0);
     const [errors, setErrors] = useState({}); // State to track validation errors
 
-    const timeSlots = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"];
+    const [slotOptions, setSlotOptions] = useState([]);
 
     const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     const handleBack = () => {
@@ -109,27 +109,25 @@ export function BookingPage() {
         }
     };
 
-    const getAppointmentByDoctorId = async (doctorId) => {
+    const fetchSchedulesFromDB = async (dateStr, doctorId) => {
         try {
-            if (!token) {
-                navigate("/login");
-                return;
-            }
-
-            const url = backendUrl + `/api/user/appointments/${doctorId}`;
-            let headers = {
-                Authorization: "Bearer " + token,
-            };
+            const url = `${backendUrl}/api/doctor/available/${doctorId}?slotDate=${dateStr}`;
+            const headers = { Authorization: `Bearer ${token}` };
             const { data } = await axios.get(url, { headers });
-            setAppointmentWithDoctor(data);
+
+            const slots = data.result;
+
+            const slotTimes = slots
+                .filter((slot) => !slot.booked) // chỉ lấy lịch chưa được đặt
+                .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                .map((slot) => `${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}`); // "16:00 - 17:00"
+
+            setSlotOptions(slotTimes);
         } catch (error) {
-            setErrors({ general: "Không thể tải lịch bác sĩ. Vui lòng thử lại." });
+            console.error("Lỗi khi gọi API:", error);
+            return [];
         }
     };
-
-    const bookedTimes = appointmentWithDoctor.filter((app) => app.doctorId === selectedDoctor && app.slotDate === selectedDate).map((app) => app.slotTime);
-
-    const availableTimeSlots = timeSlots.filter((time) => !bookedTimes.includes(time));
 
     const renderStepContent = () => {
         if (currentStep === 0) {
@@ -169,7 +167,7 @@ export function BookingPage() {
                                         onClick={() => {
                                             setSelectedDoctor(doctor.id);
                                             setPrice(doctor.fees);
-                                            getAppointmentByDoctorId(doctor.id);
+                                            fetchSchedulesFromDB(selectedDate, doctor.id);
                                             setErrors({}); // Clear errors
                                         }}
                                         className={`flex items-center p-4 border rounded-lg transition-colors ${selectedDoctor === doctor.id.toString() ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"}`}
@@ -185,27 +183,32 @@ export function BookingPage() {
                         )}
                     </div>
                     <div className="space-y-6">
-                        <div>
-                            <label className="block text-lg font-medium text-gray-700 mb-2">Chọn ngày khám</label>
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => {
-                                    setSelectedDate(e.target.value);
-                                    setErrors((prev) => ({ ...prev, selectedDate: "" }));
-                                }}
-                                min={new Date().toISOString().split("T")[0]}
-                                className={`w-[25%] px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.selectedDate ? "border-red-500" : "border-gray-300"}`}
-                            />
-                            {errors.selectedDate && <p className="text-red-500 text-sm mt-1">{errors.selectedDate}</p>}
-                        </div>
-                        {selectedDate && (
+                        {selectedDoctor && (
+                            <div>
+                                <label className="block text-lg font-medium text-gray-700 mb-2">Chọn ngày khám</label>
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => {
+                                        setSelectedDate(e.target.value);
+                                        fetchSchedulesFromDB(e.target.value ? e.target.value : selectedDate, selectedDoctor);
+                                        setErrors((prev) => ({ ...prev, selectedDate: "" }));
+                                    }}
+                                    min={new Date().toISOString().split("T")[0]}
+                                    className={`w-[25%] px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.selectedDate ? "border-red-500" : "border-gray-300"}`}
+                                />
+                                {errors.selectedDate && <p className="text-red-500 text-sm mt-1">{errors.selectedDate}</p>}
+                            </div>
+                        )}
+
+                        {selectedDate && selectedDoctor && (
                             <div>
                                 <label className="block text-lg font-medium text-gray-700 mb-2">Chọn giờ khám</label>
+                                {slotOptions.length === 0 && selectedDoctor !== "" && <div className="text-red-500 text-lg mt-5">Không có lịch trống của ngày hôm nay</div>}
                                 <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                                    {availableTimeSlots.map((time) => (
+                                    {slotOptions.map((time, index) => (
                                         <button
-                                            key={time}
+                                            key={index}
                                             onClick={() => {
                                                 setSelectedTime(time);
                                                 setErrors((prev) => ({ ...prev, selectedTime: "" }));
@@ -440,7 +443,13 @@ export function BookingPage() {
                 </div>
                 {currentStep < steps.length - 1 && currentStep !== 2 && (
                     <div className="flex justify-between">
-                        <button onClick={handleBack} className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}>
+                        <button
+                            onClick={() => {
+                                setSlotOptions([]);
+                                handleBack();
+                            }}
+                            className={`px-6 py-2 rounded-md ${currentStep === 0 ? "invisible" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"}`}
+                        >
                             Quay lại
                         </button>
                         <button

@@ -19,6 +19,8 @@ import Contact from "./pages/Contact";
 import DoctorDetails from "./pages/DoctorDetails";
 import DoctorReview from "./pages/DoctorReview";
 import DepartmentDetails from "./pages/DepartmentDetails";
+import Departments from "./pages/Departments";
+import Test from "./pages/Test";
 
 function App() {
     const location = useLocation();
@@ -44,7 +46,8 @@ function App() {
                 <Route path="/my-appointments" element={<MyAppointments />} />
                 <Route path="/appointment/:docId" element={<Appointment />} />
                 <Route path="/department/:id" element={<DepartmentDetails />} />
-
+                <Route path="/departments" element={<Departments />} />
+                <Route path="/test" element={<Test />} />
             </Routes>
 
             {!hideHeaderFooter && <Footer />}

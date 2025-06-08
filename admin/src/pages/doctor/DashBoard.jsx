@@ -8,10 +8,12 @@ const DashBoard = () => {
 
     console.log("appointmentData ", appointmentData);
 
+    const doctorId = localStorage.getItem("doctorId");
+
     const seenUserIds = new Set();
 
     const completedAppointments = appointmentData.filter((appointment) => {
-        if (appointment.completed && !seenUserIds.has(appointment.userId)) {
+        if (appointment.completed && appointment.doctorId === doctorId && !seenUserIds.has(appointment.userId)) {
             seenUserIds.add(appointment.userId);
             return true;
         }
@@ -102,7 +104,7 @@ const DashBoard = () => {
                 </div>
             </div>
             <div className="w-full max-w-7xl mx-auto">
-                <MonthlySalesChart appointmentData={appointmentData} />
+                <MonthlySalesChart appointmentData={completedAppointments} />
             </div>
         </div>
     );

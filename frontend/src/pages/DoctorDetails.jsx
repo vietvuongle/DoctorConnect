@@ -226,6 +226,9 @@ export function DoctorDetails() {
                         onClick={() => {
                             setShowBooking(true);
                             getAppointmentByDoctorId(id);
+                            if (!token) {
+                                navigate("/login");
+                            }
                         }}
                     >
                         Đặt lịch khám bệnh

@@ -22,12 +22,19 @@ import CreateMedicalRecord from "./pages/doctor/CreateMedicalRecord";
 import ViewMedicalRecord from "./pages/doctor/ViewMedicalRecord";
 import ViewAdminMedicalRecord from "./pages/admin/ViewMedicalRecord";
 import ChangePassword from "./pages/doctor/ChangePassword";
+import EditDepartment from "./pages/admin/EditDepartment";
+import DoctorSchedule from "./pages/doctor/DoctorSchedule";
+import { ClinicContext } from "./context/ClinicContext";
+import ClinicAddDoctor from "./pages/clinic/ClinicAddDoctor";
+import AddClinic from "./pages/admin/AddClinic";
+import ClinicDetail from "./pages/admin/ClinicDetail";
 
 function App() {
     const { aToken } = useContext(AdminContext);
     const { dToken } = useContext(DoctorContext);
+    const { cToken } = useContext(ClinicContext);
 
-    return aToken || dToken ? (
+    return aToken || dToken || cToken ? (
         <div className="bg-[#F8F9FD]">
             <ToastContainer />
             <Navbar />
@@ -36,8 +43,11 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/admin/doctor" element={<AddDoctor />} />
+                    <Route path="/admin/clinic" element={<AddClinic />} />
+                    <Route path="/admin/clinic/:clinicId" element={<ClinicDetail />} />
                     <Route path="/admin/doctor/:doctorId" element={<DoctorDetail />} />
                     <Route path="/admin/department" element={<Departments />} />
+                    <Route path="/admin/departments/edit/:id" element={<EditDepartment />} />
                     {/* <Route path="/admin/list-doctor" element={<ListDoctor />} /> */}
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/schedule" element={<Schedule />} />
@@ -49,11 +59,15 @@ function App() {
 
                     <Route path="/doctor/dashboard" element={<Dashboard />} />
                     <Route path="/doctor/home" element={<HomeDoctor />} />
+                    <Route path="/doctor/shedule" element={<DoctorSchedule />} />
                     <Route path="/doctor/change-password" element={<ChangePassword />} />
                     <Route path="/doctor/patient" element={<PatientOfDoctor />} />
                     <Route path="/doctor/patient/:patientId" element={<ViewMedicalRecord />} />
                     <Route path="/doctor/view-medical" element={<ViewMedicalRecord />} />
                     <Route path="/doctor/create-medical/:userId/:appointmentId" element={<CreateMedicalRecord />} />
+
+                    {/* Clinic */}
+                    <Route path="/clinic/add-doctor" element={<ClinicAddDoctor />} />
                 </Routes>
             </div>
         </div>
