@@ -23,11 +23,16 @@ import ViewMedicalRecord from "./pages/doctor/ViewMedicalRecord";
 import ViewAdminMedicalRecord from "./pages/admin/ViewMedicalRecord";
 import ChangePassword from "./pages/doctor/ChangePassword";
 import EditDepartment from "./pages/admin/EditDepartment";
-import DoctorSchedule from "./pages/doctor/DoctorSchedule";
+import DoctorSchedule from "./pages/clinic/DoctorSchedule";
 import { ClinicContext } from "./context/ClinicContext";
 import ClinicAddDoctor from "./pages/clinic/ClinicAddDoctor";
 import AddClinic from "./pages/admin/AddClinic";
 import ClinicDetail from "./pages/admin/ClinicDetail";
+import ClinicDoctorDetail from "./pages/clinic/ClinicDoctorDetail";
+import ClinicDashBoard from "./pages/clinic/ClinicDashboard";
+import ClinicAppointment from "./pages/clinic/ClinicAppointment";
+import ClinicPatient from "./pages/clinic/ClinicPatient";
+import ClinicViewMedicalRecord from "./pages/clinic/ClinicViewMedicalRecord";
 
 function App() {
     const { aToken } = useContext(AdminContext);
@@ -59,7 +64,6 @@ function App() {
 
                     <Route path="/doctor/dashboard" element={<Dashboard />} />
                     <Route path="/doctor/home" element={<HomeDoctor />} />
-                    <Route path="/doctor/shedule" element={<DoctorSchedule />} />
                     <Route path="/doctor/change-password" element={<ChangePassword />} />
                     <Route path="/doctor/patient" element={<PatientOfDoctor />} />
                     <Route path="/doctor/patient/:patientId" element={<ViewMedicalRecord />} />
@@ -67,7 +71,13 @@ function App() {
                     <Route path="/doctor/create-medical/:userId/:appointmentId" element={<CreateMedicalRecord />} />
 
                     {/* Clinic */}
-                    <Route path="/clinic/add-doctor" element={<ClinicAddDoctor />} />
+                    <Route path="/clinic/doctor" element={<ClinicAddDoctor />} />
+                    <Route path="/clinic/dashboard" element={<ClinicDashBoard />} />
+                    <Route path="/clinic/appointment" element={<ClinicAppointment />} />
+                    <Route path="/clinic/patient" element={<ClinicPatient />} />
+                    <Route path="/clinic/patient/:patientId" element={<ClinicViewMedicalRecord />} />
+                    <Route path="/clinic/doctor/:doctorId" element={<ClinicDoctorDetail />} />
+                    <Route path="/clinic/doctor-schedule/:doctorId" element={<DoctorSchedule />} />
                 </Routes>
             </div>
         </div>

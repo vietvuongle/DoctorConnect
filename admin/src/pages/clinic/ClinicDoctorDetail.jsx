@@ -5,10 +5,11 @@ import { AdminContext } from "../../context/AdminContext";
 import { toast } from "react-toastify";
 import axios from "axios";
 import TiptapEditor from "../../components/TiptapEditor";
-const DoctorDetail = () => {
+import { ClinicContext } from "../../context/ClinicContext";
+const ClinicDoctorDetail = () => {
     const { doctorId } = useParams();
 
-    const { aToken, backendUrl, doctorData, getDoctorData } = useContext(AdminContext);
+    const { cToken, backendUrl, doctorData, getDoctorDataByClinicId } = useContext(ClinicContext);
 
     const [isEditing, setIsEditing] = useState(false);
     const [docInfo, setDocInfo] = useState(null);
@@ -74,7 +75,7 @@ const DoctorDetail = () => {
 
             const { data } = await axios.post(backendUrl + "/api/admin/update-doctor", formData, {
                 headers: {
-                    Authorization: `Bearer ${aToken}`,
+                    Authorization: `Bearer ${cToken}`,
                 },
             });
 
@@ -82,7 +83,7 @@ const DoctorDetail = () => {
 
             if (data !== null) {
                 toast.success("Cập nhật bác sĩ thành công");
-                getDoctorData();
+                getDoctorDataByClinicId();
                 setIsEditing(false);
             } else {
                 toast.error("Có lỗi đã xảy ra");
@@ -103,8 +104,8 @@ const DoctorDetail = () => {
 
     return (
         docInfo && (
-            <div className="min-h-screen bg-gray-100 py-8 w-full">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen mt-5 w-full">
+                <div className="max-w-6xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">Thông tin chi tiết bác sĩ</h2>
@@ -423,4 +424,4 @@ const DoctorDetail = () => {
         )
     );
 };
-export default DoctorDetail;
+export default ClinicDoctorDetail;

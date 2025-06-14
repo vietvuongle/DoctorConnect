@@ -80,23 +80,23 @@ const Login = () => {
                 </button>
                 <div className="gap-2">
                     {state !== "Admin" && (
-                        <p>
-                            Đăng nhập Admin?{" "}
-                            <span className="text-primary underline cursor-pointer" onClick={() => setState("Admin")}>
+                        <p className="mt-1">
+                            Đăng nhập với Admin?{" "}
+                            <span className="text-primary underline cursor-pointer ml-4" onClick={() => setState("Admin")}>
                                 Click Here
                             </span>
                         </p>
                     )}
                     {state !== "Doctor" && (
-                        <p>
-                            Đăng nhập Bác sĩ?{" "}
-                            <span className="text-primary underline cursor-pointer" onClick={() => setState("Doctor")}>
+                        <p className="mt-1">
+                            Đăng nhập với Bác sĩ?{" "}
+                            <span className="text-primary underline cursor-pointer ml-5" onClick={() => setState("Doctor")}>
                                 Click Here
                             </span>
                         </p>
                     )}
                     {state !== "Clinic" && (
-                        <p>
+                        <p className="mt-1">
                             Đăng nhập Phòng khám?{" "}
                             <span className="text-primary underline cursor-pointer" onClick={() => setState("Clinic")}>
                                 Click Here

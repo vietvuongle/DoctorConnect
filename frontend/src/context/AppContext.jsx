@@ -19,6 +19,8 @@ const AppContextProvider = (props) => {
 
     const [topReview, setTopReview] = useState([]);
 
+    const [clinicData, setClinicData] = useState([]);
+
     const getAllUser = async () => {
         try {
             const { data } = await axios.get(backendUrl + "/api/user/all-user");
@@ -51,6 +53,20 @@ const AppContextProvider = (props) => {
             const { data } = await axios.get(backendUrl + "/api/admin/all-doctor");
             if (data !== false) {
                 setDoctorData(data.result);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const getClinicData = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/admin/all-clinic");
+            if (data !== false) {
+                setClinicData(data.result);
+                console.log("clinicData", data.result);
             } else {
                 toast.error("Error");
             }
@@ -143,6 +159,7 @@ const AppContextProvider = (props) => {
         topReview,
         getTopReview,
         handleSmoothScroll,
+        clinicData,
     };
 
     useEffect(() => {
@@ -150,6 +167,7 @@ const AppContextProvider = (props) => {
         getDoctorData();
         getAllUser();
         getTopReview();
+        getClinicData();
     }, []);
 
     useEffect(() => {

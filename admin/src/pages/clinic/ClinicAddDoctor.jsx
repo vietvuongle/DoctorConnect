@@ -30,8 +30,10 @@ const ClinicAddDoctor = () => {
     const [sex, setSex] = useState("Nam");
     const [school, setSchool] = useState("");
 
-    const { backendUrl, aToken, departmentData, doctorData } = useContext(AdminContext);
-    const { cToken } = useContext(ClinicContext);
+    const { backendUrl, departmentData } = useContext(AdminContext);
+    const { doctorData, cToken, getDoctorDataByClinicId } = useContext(ClinicContext);
+
+    const clinnicId = localStorage.getItem("clinicId");
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
@@ -45,6 +47,7 @@ const ClinicAddDoctor = () => {
             const cleanedFees = fees.replace(/\./g, "");
 
             const formData = new FormData();
+            formData.append("clinicId", clinnicId);
             formData.append("image", docImg);
             formData.append("name", name);
             formData.append("email", email);
@@ -61,12 +64,13 @@ const ClinicAddDoctor = () => {
 
             const { data } = await axios.post(backendUrl + "/api/admin/add-doctor", formData, {
                 headers: {
-                    Authorization: `Bearer ${aToken}`,
+                    Authorization: `Bearer ${cToken}`,
                     "Content-Type": "multipart/form-data",
                 },
             });
 
             if (data !== false) {
+                getDoctorDataByClinicId();
                 toast.success("Thêm bác sĩ thành công");
 
                 setDocImg(false);
@@ -294,14 +298,22 @@ const ClinicAddDoctor = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button
                                             onClick={() => {
-                                                navigate(`/admin/doctor/${doctor.id}`);
+                                                navigate(`/clinic/doctor/${doctor.id}`);
                                                 scrollTo(0, 0);
                                             }}
                                             className="text-blue-600 hover:text-blue-900 mr-3"
                                         >
                                             Xem
                                         </button>
-                                        <button className="text-red-600 hover:text-red-900">Vô hiệu</button>
+                                        <button
+                                            onClick={() => {
+                                                navigate(`/clinic/doctor-schedule/${doctor.id}`);
+                                                scrollTo(0, 0);
+                                            }}
+                                            className="text-yellow-500 hover:text-yellow-900"
+                                        >
+                                            Tạo lịch khám
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

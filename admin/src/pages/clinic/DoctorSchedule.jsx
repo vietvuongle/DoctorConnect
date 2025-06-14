@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeftIcon, ClockIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, SaveIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isBefore, startOfDay, addHours, isAfter } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useContext } from "react";
 import axios from "axios";
-import { DoctorContext } from "../../context/DoctorContext";
 import { toast } from "react-toastify";
+import { ClinicContext } from "../../context/ClinicContext";
 
 const DoctorSchedule = () => {
-    const { dToken, backendUrl } = useContext(DoctorContext);
+    const { cToken, backendUrl, doctorData } = useContext(ClinicContext);
 
-    const doctorId = localStorage.getItem("doctorId");
+    const { doctorId } = useParams();
+
+    const doctorName = doctorData?.find((doc) => doc.id === doctorId)?.name;
+
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const [schedules, setSchedules] = useState({});
@@ -51,7 +54,7 @@ const DoctorSchedule = () => {
 
     // Kiểm tra khung giờ trong ngày hôm nay phải lớn hơn giờ hiện tại + 2 tiếng
     const isTimeSlotInFuture = (date, startTime) => {
-        const nowPlus2h = addHours(new Date(), 2); // Current time is 06:27 PM +07, so 08:27 PM
+        const nowPlus2h = addHours(new Date(), 1); // Current time is 06:27 PM +07, so 08:27 PM
         const [hour, minute] = startTime.split(":").map(Number);
         const slotDateTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, minute);
         return isAfter(slotDateTime, nowPlus2h);
@@ -66,7 +69,7 @@ const DoctorSchedule = () => {
     const fetchSchedulesFromDB = async (dateStr) => {
         try {
             const url = `${backendUrl}/api/doctor/available/${doctorId}?slotDate=${dateStr}`;
-            const headers = { Authorization: `Bearer ${dToken}` };
+            const headers = { Authorization: `Bearer ${cToken}` };
             const { data } = await axios.get(url, { headers });
 
             return data.code === 1000 ? data.result : [];
@@ -146,7 +149,7 @@ const DoctorSchedule = () => {
             // Xóa từ DB nếu khung giờ đã tồn tại trong DB
             try {
                 const url = `${backendUrl}/api/doctor/delete-schedule/${slotInDB.id}`;
-                const headers = { Authorization: `Bearer ${dToken}` };
+                const headers = { Authorization: `Bearer ${cToken}` };
                 const { data } = await axios.delete(url, { headers });
 
                 if (data.code === 1000) {
@@ -174,7 +177,7 @@ const DoctorSchedule = () => {
 
         try {
             const url = `${backendUrl}/api/doctor/create-schedule`;
-            const headers = { Authorization: `Bearer ${dToken}` };
+            const headers = { Authorization: `Bearer ${cToken}` };
             const payload = {
                 doctorId,
                 slotDate: dateStr,
@@ -186,7 +189,7 @@ const DoctorSchedule = () => {
 
             const { data } = await axios.post(url, payload, { headers });
             if (data.code === 1000) {
-                console.log("Schedule saved successfully:", data);
+                toast.success("Thêm lịch khám thành công");
                 await fetchSchedulesFromDB(dateStr);
             } else {
                 console.error("Failed to save schedule:", data.message);
@@ -197,12 +200,15 @@ const DoctorSchedule = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8 flex-1">
+        <div className="min-h-screen mt-5 mr-5 flex-1">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="p-6 border-b border-gray-200">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-2xl font-bold text-gray-900">Quản lý lịch làm việc</h2>
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Quản lý lịch làm việc</h2>
+                                <h2 className="text-lg mt-3 font-bold text-gray-600">Bs. {doctorName}</h2>
+                            </div>
                             <div className="flex space-x-4">
                                 <button onClick={handlePreviousWeek} className="p-2 rounded-full hover:bg-gray-100">
                                     <ChevronLeftIcon className="w-5 h-5" />
@@ -293,10 +299,15 @@ const DoctorSchedule = () => {
                 </div>
             </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 px- 4 mt-5 flex items-center justify-between">
-                <div></div>
+                <div className="flex items-center">
+                    <Link to="/clinic/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                        Quay lại
+                    </Link>
+                </div>
                 <button onClick={handleSaveSchedule} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                     <SaveIcon className="w-5 h-5 mr-2" />
-                    Lưu lịch làm việc
+                    Tạo lịch làm việc
                 </button>
             </div>
         </div>

@@ -21,6 +21,7 @@ import DoctorReview from "./pages/DoctorReview";
 import DepartmentDetails from "./pages/DepartmentDetails";
 import Departments from "./pages/Departments";
 import Test from "./pages/Test";
+import ClinicDetail from "./pages/ClinicDetail";
 
 function App() {
     const location = useLocation();
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/doctors" element={<Doctors />} />
                 <Route path="/doctor/:id" element={<DoctorDetails />} />
+                <Route path="/clinic/:id" element={<ClinicDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<ServicePage />} />
                 <Route path="/oauth2-success" element={<OAuth2Success />} />
