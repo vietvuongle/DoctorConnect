@@ -6,8 +6,9 @@ import { AdminContext } from "../../context/AdminContext";
 import { PlusIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TiptapEditor from "../../components/TiptapEditor";
+import { ClinicContext } from "../../context/ClinicContext";
 
-const AddDoctor = () => {
+const ClinicAddDoctor = () => {
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1); // Current page state
@@ -29,7 +30,10 @@ const AddDoctor = () => {
     const [sex, setSex] = useState("Nam");
     const [school, setSchool] = useState("");
 
-    const { backendUrl, aToken, departmentData, doctorData } = useContext(AdminContext);
+    const { backendUrl, departmentData } = useContext(AdminContext);
+    const { doctorData, cToken, getDoctorDataByClinicId } = useContext(ClinicContext);
+
+    const clinnicId = localStorage.getItem("clinicId");
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
@@ -43,6 +47,7 @@ const AddDoctor = () => {
             const cleanedFees = fees.replace(/\./g, "");
 
             const formData = new FormData();
+            formData.append("clinicId", clinnicId);
             formData.append("image", docImg);
             formData.append("name", name);
             formData.append("email", email);
@@ -59,12 +64,13 @@ const AddDoctor = () => {
 
             const { data } = await axios.post(backendUrl + "/api/admin/add-doctor", formData, {
                 headers: {
-                    Authorization: `Bearer ${aToken}`,
+                    Authorization: `Bearer ${cToken}`,
                     "Content-Type": "multipart/form-data",
                 },
             });
 
             if (data !== false) {
+                getDoctorDataByClinicId();
                 toast.success("Thêm bác sĩ thành công");
 
                 setDocImg(false);
@@ -129,7 +135,7 @@ const AddDoctor = () => {
                 </div>
 
                 {isAddingNew && (
-                    <div className="bg-white px-8 border py-8 rounded w-full max-w-5xl overflow-y-scroll">
+                    <div className="bg-white px-8 border mt-5 py-8 rounded w-full max-w-5xl overflow-y-scroll">
                         <div className="flex items-center gap-4 mb-8 text-gray-500">
                             <label htmlFor="doc-img">
                                 <img className="w-16 bg-gray-100 rounded-full cursor-pointer" src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
@@ -292,14 +298,22 @@ const AddDoctor = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button
                                             onClick={() => {
-                                                navigate(`/admin/doctor/${doctor.id}`);
+                                                navigate(`/clinic/doctor/${doctor.id}`);
                                                 scrollTo(0, 0);
                                             }}
                                             className="text-blue-600 hover:text-blue-900 mr-3"
                                         >
                                             Xem
                                         </button>
-                                        <button className="text-red-600 hover:text-red-900">Vô hiệu</button>
+                                        <button
+                                            onClick={() => {
+                                                navigate(`/clinic/doctor-schedule/${doctor.id}`);
+                                                scrollTo(0, 0);
+                                            }}
+                                            className="text-yellow-500 hover:text-yellow-900"
+                                        >
+                                            Tạo lịch khám
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -331,4 +345,4 @@ const AddDoctor = () => {
     );
 };
 
-export default AddDoctor;
+export default ClinicAddDoctor;

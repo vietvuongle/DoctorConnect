@@ -1,12 +1,13 @@
 import React, { useContext, useState } from "react";
 import { AdminContext } from "../../context/AdminContext";
-import { DoctorContext } from "../../context/DoctorContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { ClinicContext } from "../../context/ClinicContext";
 
-const Schedule = () => {
-    const { appointmentData, doctorData, aToken, backendUrl, getDepartment, getAllAppointment } = useContext(AdminContext);
-    const { formatDateHeader } = useContext(DoctorContext);
+const ClinicAppointment = () => {
+    const { getDepartment } = useContext(AdminContext);
+
+    const { doctorData, appointmentData, formatDateHeader, cToken, backendUrl, getAllAppointmentByClinicId } = useContext(ClinicContext);
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5; // Number of appointments per page
@@ -31,11 +32,11 @@ const Schedule = () => {
                 `${backendUrl}/api/doctor/appointment/confirm/${id}`,
                 {},
                 {
-                    headers: { Authorization: `Bearer ${aToken}` },
+                    headers: { Authorization: `Bearer ${cToken}` },
                 }
             );
             toast.success("Đã xác nhận thành công");
-            getAllAppointment();
+            getAllAppointmentByClinicId();
             getDepartment();
         } catch (err) {
             console.error(err);
@@ -49,7 +50,7 @@ const Schedule = () => {
                 `${backendUrl}/api/doctor/appointment/cancel/${id}`,
                 {},
                 {
-                    headers: { Authorization: `Bearer ${aToken}` },
+                    headers: { Authorization: `Bearer ${cToken}` },
                 }
             );
             toast.success("Đã hủy thành công");
@@ -185,4 +186,4 @@ const Schedule = () => {
     );
 };
 
-export default Schedule;
+export default ClinicAppointment;

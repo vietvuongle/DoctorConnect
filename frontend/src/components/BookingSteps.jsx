@@ -23,7 +23,7 @@ export function BookingSteps() {
         {
             icon: <CheckCircleIcon className="h-10 w-10 text-blue-600" />,
             title: "Xác nhận lịch hẹn",
-            description: "Nhận xác nhận qua email hoặc SMS",
+            description: "Nhận thông báo qua email hoặc SMS",
         },
     ];
     return (

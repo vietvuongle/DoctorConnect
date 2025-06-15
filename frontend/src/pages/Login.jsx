@@ -2,23 +2,50 @@ import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { Facebook as FacebookIcon } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Login = () => {
-    const { setToken } = useContext(AppContext);
+    const { setToken, backendUrl } = useContext(AppContext);
 
     const [state, setState] = useState("Đăng Kí");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [errors, setErrors] = useState({}); // State to track validation errors
 
     const navigate = useNavigate();
 
-    const { backendUrl } = useContext(AppContext);
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (state === "Đăng Kí" && !name.trim()) {
+            newErrors.name = "Vui lòng nhập họ và tên.";
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.trim()) {
+            newErrors.email = "Vui lòng nhập email.";
+        } else if (!emailRegex.test(email)) {
+            newErrors.email = "Email không hợp lệ.";
+        }
+
+        if (!password.trim()) {
+            newErrors.password = "Vui lòng nhập mật khẩu.";
+        } else if (password.length < 6) {
+            newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự.";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Return true if no errors
+    };
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return; // Stop if validation fails
+        }
 
         try {
             if (state === "Đăng Kí") {
@@ -31,10 +58,11 @@ const Login = () => {
                 const { code, result } = response.data;
 
                 if (code === 1000 && result) {
+                    setErrors({}); // Clear errors on success
                     toast.success("Đăng kí thành công");
                     navigate("/login");
                 } else {
-                    toast.error("Đăng kí thất bại");
+                    setErrors({ general: "Đăng kí thất bại. Vui lòng thử lại." });
                 }
             } else {
                 const response = await axios.post(backendUrl + "/api/user/login", {
@@ -46,50 +74,74 @@ const Login = () => {
 
                 if (code === 0 && result && result.token) {
                     const token = result.token;
-
                     setToken(token);
                     localStorage.setItem("token", token);
-
+                    setErrors({}); // Clear errors on success
                     toast.success("Đăng nhập thành công");
                     navigate("/");
                 } else {
-                    toast.error("Mật khẩu hoặc tài khoản không đúng");
+                    setErrors({ general: "Mật khẩu hoặc tài khoản không đúng." });
                 }
             }
         } catch (error) {
             if (error.response && error.response.data) {
                 const { code, message } = error.response.data;
-                toast.error(message);
-                console.error("Chi tiết lỗi:", code, message);
+                setErrors({ general: message || "Đã xảy ra lỗi. Vui lòng thử lại." });
             } else {
-                toast.error("Đã xảy ra lỗi không xác định");
-                console.error("Lỗi không xác định:", error);
+                setErrors({ general: "Đã xảy ra lỗi không xác định. Vui lòng kiểm tra kết nối và thử lại." });
             }
         }
     };
 
     const handleGoogleRedirectLogin = () => {
-        // Chuyển hướng đến URL login Google (OAuth2)
         window.location.href = backendUrl + "/oauth2/authorization/google";
     };
 
     return (
         <form onSubmit={onSubmitHandler} className="flex items-center h-screen">
-            <div className="flex flex-col gap-3 mx-auto  border sm:min-w-96 rounded-xl p-8 min-w-[340px] text-zinc-600 text-sm shadow-lg">
+            <div className="flex flex-col gap-3 mx-auto border sm:min-w-96 rounded-xl p-8 min-w-[340px] text-zinc-600 text-sm shadow-lg">
                 <p className="text-3xl font-semibold text-center">{state === "Đăng Kí" ? "Đăng Kí" : "Đăng Nhập"}</p>
+                {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>}
                 {state === "Đăng Kí" && (
                     <div className="w-full">
                         <p>Họ và tên</p>
-                        <input onChange={(e) => setName(e.target.value)} value={name} className="border border-zinc-300 rounded w-full p-2 mt-1" type="text" required />
+                        <input
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                setErrors((prev) => ({ ...prev, name: "" }));
+                            }}
+                            value={name}
+                            className={`border rounded w-full p-2 mt-1 ${errors.name ? "border-red-500" : "border-zinc-300"}`}
+                            type="text"
+                        />
+                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                     </div>
                 )}
                 <div className="w-full">
                     <p>Email</p>
-                    <input onChange={(e) => setEmail(e.target.value)} value={email} className="border border-zinc-300 rounded w-full p-2 mt-1" type="email" required />
+                    <input
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            setErrors((prev) => ({ ...prev, email: "" }));
+                        }}
+                        value={email}
+                        className={`border rounded w-full p-2 mt-1 ${errors.email ? "border-red-500" : "border-zinc-300"}`}
+                        type="email"
+                    />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                 </div>
                 <div className="w-full">
                     <p>Mật Khẩu</p>
-                    <input onChange={(e) => setPassword(e.target.value)} value={password} className="border border-zinc-300 rounded w-full p-2 mt-1" type="password" required />
+                    <input
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            setErrors((prev) => ({ ...prev, password: "" }));
+                        }}
+                        value={password}
+                        className={`border rounded w-full p-2 mt-1 ${errors.password ? "border-red-500" : "border-zinc-300"}`}
+                        type="password"
+                    />
+                    {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                 </div>
                 <button type="submit" className="py-2 rounded-md bg-primary hover:scale-105 transition-all text-white text-base">
                     {state === "Đăng Kí" ? "Đăng Kí" : "Đăng Nhập"}
@@ -108,7 +160,6 @@ const Login = () => {
                             </a>
                         </button>
                     </div>
-
                     {/* Facebook Button */}
                     <div>
                         <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-full shadow-sm bg-white hover:bg-gray-100">
@@ -122,18 +173,29 @@ const Login = () => {
                         </a>
                     </div>
                 </div>
-
                 {state === "Đăng Kí" ? (
                     <p>
                         Bạn đã có tài khoản?{" "}
-                        <span className="underline cursor-pointer text-primary" onClick={() => setState("Đăng Nhập")}>
+                        <span
+                            className="underline cursor-pointer text-primary"
+                            onClick={() => {
+                                setState("Đăng Nhập");
+                                setErrors({}); // Clear errors when switching
+                            }}
+                        >
                             Đăng Nhập Ngay
                         </span>
                     </p>
                 ) : (
                     <p>
                         Bạn chưa có tài khoản?{" "}
-                        <span className="underline cursor-pointer text-primary" onClick={() => setState("Đăng Kí")}>
+                        <span
+                            className="underline cursor-pointer text-primary"
+                            onClick={() => {
+                                setState("Đăng Kí");
+                                setErrors({}); // Clear errors when switching
+                            }}
+                        >
                             Đăng Kí Ngay
                         </span>
                     </p>

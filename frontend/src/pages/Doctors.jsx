@@ -4,7 +4,7 @@ import { AppContext } from "../context/AppContext";
 import { Link } from "react-router-dom";
 
 export function Doctors() {
-    const { departmentData } = useContext(AppContext);
+    const { departmentData, handleSmoothScroll } = useContext(AppContext);
     const { doctorData } = useContext(AppContext);
 
     const [selectedSpecialty, setSelectedSpecialty] = useState("Tất cả chuyên khoa");
@@ -60,7 +60,7 @@ export function Doctors() {
                         <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden">
                             <div className="flex flex-col md:flex-row">
                                 <div className="md:w-1/3">
-                                    <img src={doctor.image} alt={doctor.name} className="w-full h-48 md:h-full object-cover" />
+                                    <img src={doctor.image} alt={doctor.name} className="w-full md:h-full sm:w-48 sm:h-48 object-cover" />
                                 </div>
                                 <div className="md:w-2/3 p-6">
                                     <div className="p-6">
@@ -86,12 +86,11 @@ export function Doctors() {
                                             </div>
                                         </div>
                                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                            <div className="flex items-center text-green-600">
-                                                <CalendarIcon className="h-5 w-5 mr-1" />
-                                                <span className="text-sm">Lịch trống: {doctor.nextAvailable}</span>
-                                            </div>
+                                            <div className="flex items-center text-green-600"></div>
                                             <Link to={`/doctor/${doctor.id}`}>
-                                                <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">Đặt lịch khám</button>
+                                                <button onClick={() => handleSmoothScroll()} className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">
+                                                    Xem chi tiết
+                                                </button>
                                             </Link>
                                         </div>
                                     </div>

@@ -17,6 +17,10 @@ const AppContextProvider = (props) => {
 
     const [appointmentData, setAppointmentData] = useState([]);
 
+    const [topReview, setTopReview] = useState([]);
+
+    const [clinicData, setClinicData] = useState([]);
+
     const getAllUser = async () => {
         try {
             const { data } = await axios.get(backendUrl + "/api/user/all-user");
@@ -57,6 +61,20 @@ const AppContextProvider = (props) => {
         }
     };
 
+    const getClinicData = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/admin/all-clinic");
+            if (data !== false) {
+                setClinicData(data.result);
+                console.log("clinicData", data.result);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
     const getAppointments = async () => {
         try {
             const url = backendUrl + "/api/user/appointments";
@@ -74,9 +92,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getUserProfile = async () => {
@@ -91,9 +107,22 @@ const AppContextProvider = (props) => {
 
             if (data !== null) {
                 setUserProfile(data.result);
-                console.log("userprofile", data.result);
 
                 localStorage.setItem("userId", data.result._id);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            console.error("Lỗi khi gọi API user profile:", error.message);
+        }
+    };
+
+    const getTopReview = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/user/top-review");
+
+            if (data !== null) {
+                setTopReview(data.result);
             } else {
                 toast.error("Error");
             }
@@ -111,6 +140,10 @@ const AppContextProvider = (props) => {
         return `${day}/${month}/${year}`;
     };
 
+    const handleSmoothScroll = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     const value = {
         backendUrl,
         token,
@@ -123,12 +156,18 @@ const AppContextProvider = (props) => {
         allUserData,
         userProfile,
         getUserProfile,
+        topReview,
+        getTopReview,
+        handleSmoothScroll,
+        clinicData,
     };
 
     useEffect(() => {
         getDepartment();
         getDoctorData();
         getAllUser();
+        getTopReview();
+        getClinicData();
     }, []);
 
     useEffect(() => {

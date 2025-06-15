@@ -1,42 +1,88 @@
-import React, { use, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Plus as PlusIcon, Pencil as PencilIcon, Trash2 as TrashIcon, X as CloseIcon, Save as SaveIcon } from "lucide-react";
 import { assets } from "../../assets/assets";
 import { toast } from "react-toastify";
 import { AdminContext } from "../../context/AdminContext";
 import axios from "axios";
+import TiptapEditor from "../../components/TiptapEditor";
+import { useNavigate } from "react-router-dom";
 
 export function Departments() {
     const { backendUrl, aToken, departmentData, getDepartment } = useContext(AdminContext);
+    const navigate = useNavigate();
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
+    const [about, setAbout] = useState("");
     const [iconImage, setIconImage] = useState(false);
-
     const [isAddingNew, setIsAddingNew] = useState(false);
+    const [errors, setErrors] = useState({}); // State for validation errors
 
-    const [editingDepartment, setEditingIdDepartment] = useState(null);
-    const [editForm, setEditForm] = useState({ name: "", description: "", iconImage: null });
+    // Validation function
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Validate Name
+        if (!name.trim()) {
+            newErrors.name = "Tên khoa là bắt buộc";
+        } else if (name.length < 2) {
+            newErrors.name = "Tên khoa phải có ít nhất 2 ký tự";
+        } else if (name.length > 100) {
+            newErrors.name = "Tên khoa không được vượt quá 100 ký tự";
+        }
+
+        // Validate Description
+        if (!description.trim()) {
+            newErrors.description = "Tiêu đề là bắt buộc";
+        } else if (description.length < 10) {
+            newErrors.description = "Tiêu đề phải có ít nhất 10 ký tự";
+        } else if (description.length > 500) {
+            newErrors.description = "Tiêu đề không được vượt quá 500 ký tự";
+        }
+
+        // Validate About (assuming TiptapEditor returns plain text or HTML string)
+        const aboutText = about.replace(/<[^>]+>/g, "").trim(); // Strip HTML tags for length check
+        if (!aboutText) {
+            newErrors.about = "Mô tả là bắt buộc";
+        } else if (aboutText.length < 20) {
+            newErrors.about = "Mô tả phải có ít nhất 20 ký tự";
+        } else if (aboutText.length > 2000) {
+            newErrors.about = "Mô tả không được vượt quá 2000 ký tự";
+        }
+
+        // Validate Icon Image
+        if (!iconImage) {
+            newErrors.iconImage = "Vui lòng chọn ảnh";
+        } else {
+            const validImageTypes = ["image/jpeg", "image/jpg", "image/png"];
+            if (!validImageTypes.includes(iconImage.type)) {
+                newErrors.iconImage = "Ảnh phải có định dạng JPG hoặc PNG";
+            } else if (iconImage.size > 5 * 1024 * 1024) {
+                newErrors.iconImage = "Ảnh không được lớn hơn 5MB";
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Return true if no errors
+    };
 
     const handleStartEdit = (department) => {
-        setEditingIdDepartment(department.id);
-        setEditForm({
-            name: department.name,
-            description: department.description,
-            iconImage: null, // không có ảnh mới, mặc định null
-        });
+        navigate(`/admin/departments/edit/${department.id}`, { state: { department } });
     };
 
     const handleStartDelete = async (departmentId) => {
         try {
             const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa khoa này?");
             if (confirmDelete) {
-                const { data } = await axios.delete(backendUrl + `/api/admin/delete-department/${departmentId}`, {
-                    Authorization: "Bearer " + aToken,
+                const { data } = await axios.delete(`${backendUrl}/api/admin/delete-department/${departmentId}`, {
+                    headers: {
+                        Authorization: `Bearer ${aToken}`,
+                    },
                 });
 
                 if (data !== false) {
                     toast.success("Xóa khoa thành công");
-                    getDepartment(); // Tải lại danh sách khoa
+                    getDepartment();
                 } else {
                     toast.error("Xóa khoa thất bại");
                 }
@@ -47,69 +93,45 @@ export function Departments() {
         }
     };
 
-    const handleImageChange = (e) => {
-        setEditForm((prev) => ({ ...prev, iconImage: e.target.files[0] }));
-    };
-
-    const handleUpdate = async (department) => {
-        try {
-            const formData = new FormData();
-            formData.append("id", department.id); // gửi id để backend biết record nào cần update
-            formData.append("name", editForm.name);
-            formData.append("description", editForm.description);
-            if (editForm.iconImage) {
-                formData.append("iconImage", editForm.iconImage);
-            }
-
-            const { data } = await axios.post(backendUrl + "/api/admin/update-department", formData, {
-                headers: {
-                    Authorization: `Bearer ${aToken}`,
-                },
-            });
-
-            if (data !== null) {
-                toast.success("Cập nhật khoa thành công");
-
-                // gọi lại API để load lại danh sách khoa
-                getDepartment();
-                setEditingIdDepartment(null);
-            } else {
-                toast.error("Có lỗi đã xảy ra");
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error("Có lỗi xảy ra");
-        }
-    };
-
     const onSubmitHandler = async (e) => {
         e.preventDefault();
 
+        // Run validation
+        if (!validateForm()) {
+            return;
+        }
+
         try {
-            if (!iconImage) {
-                toast.error("Vui lòng chọn ảnh");
-            }
             const formData = new FormData();
             formData.append("iconImage", iconImage);
             formData.append("description", description);
             formData.append("name", name);
+            formData.append("about", about);
 
-            const { data } = await axios.post(backendUrl + "/api/admin/add-department", formData, { headers: { aToken } });
+            const { data } = await axios.post(`${backendUrl}/api/admin/add-department`, formData, {
+                headers: { Authorization: `Bearer ${aToken}` },
+            });
 
             if (data !== false) {
                 toast.success("Thêm khoa thành công");
                 setIconImage(false);
                 setName("");
                 setDescription("");
+                setAbout("");
+                setIsAddingNew(false);
+                setErrors({});
                 getDepartment();
             } else {
                 toast.error("Thêm khoa thất bại");
             }
-        } catch (error) { }
+        } catch (error) {
+            console.error(error);
+            toast.error("Có lỗi xảy ra khi thêm khoa");
+        }
     };
 
     return (
-        <div className="py-8 bg-gray-50 w-full px-4">
+        <div className="py-5 bg-gray-50 w-full px-4">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                     {/* Header */}
@@ -129,7 +151,11 @@ export function Departments() {
                                 <button
                                     onClick={() => {
                                         setIsAddingNew(false);
-                                        setFormError("");
+                                        setIconImage(false);
+                                        setName("");
+                                        setDescription("");
+                                        setAbout("");
+                                        setErrors({});
                                     }}
                                     className="text-gray-500 hover:text-gray-700"
                                 >
@@ -142,20 +168,35 @@ export function Departments() {
                                         <label htmlFor="doc-img" className="cursor-pointer">
                                             <img className="w-16 h-16 bg-gray-100 rounded-full object-cover" src={iconImage ? URL.createObjectURL(iconImage) : assets.upload_area} alt="Upload Icon" />
                                         </label>
-                                        <input onChange={(e) => setIconImage(e.target.files[0])} type="file" id="doc-img" hidden />
+                                        <input onChange={(e) => setIconImage(e.target.files[0])} type="file" id="doc-img" hidden accept="image/jpeg,image/jpg,image/png" />
                                         <p className="text-sm leading-tight">
                                             Upload
                                             <br />
                                             Icon
                                         </p>
                                     </div>
+                                    {errors.iconImage && <p className="text-red-500 text-sm mt-1">{errors.iconImage}</p>}
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Tên khoa</label>
-                                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập tên khoa" />
+                                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={`w-full px-3 py-2 border ${errors.name ? "border-red-500" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`} placeholder="Nhập tên khoa" />
+                                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                                </div>
+
+                                <div className="col-span-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề</label>
+                                    <input
+                                        type="text"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        className={`w-full px-3 py-2 border ${errors.description ? "border-red-500" : "border-gray-300"} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                        placeholder="Nhập mô tả về khoa"
+                                    />
+                                    {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                                 </div>
 
                                 <div className="col-span-1">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nhập mô tả về khoa" />
+                                    <TiptapEditor value={about} onChange={setAbout} />
+                                    {errors.about && <p className="text-red-500 text-sm mt-1">{errors.about}</p>}
                                 </div>
 
                                 <div className="col-span-full flex justify-end">
@@ -183,49 +224,23 @@ export function Departments() {
                                 {departmentData.map((department) => (
                                     <tr key={department.id}>
                                         <td className="px-4 py-4">
-                                            {editingDepartment === department.id ? (
-                                                <label className="cursor-pointer">
-                                                    <img className="w-16 h-16 rounded-full object-cover" src={editForm.iconImage ? URL.createObjectURL(editForm.iconImage) : department.iconImage} alt="" />
-                                                    <input type="file" onChange={handleImageChange} className="hidden" />
-                                                </label>
-                                            ) : (
-                                                <img className="w-16 h-16 rounded-full object-cover" src={department.iconImage} alt="" />
-                                            )}
+                                            <img className="w-16 h-16 rounded-full object-cover" src={department.iconImage} alt="" />
                                         </td>
                                         <td className="px-4 py-4">
-                                            {editingDepartment === department.id ? (
-                                                <input type="text" value={editForm.name} onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                            ) : (
-                                                <div className="text-sm font-medium text-gray-900">{department.name}</div>
-                                            )}
+                                            <div className="text-sm font-medium text-gray-900">{department.name}</div>
                                         </td>
                                         <td className="px-4 py-4">
-                                            {editingDepartment === department.id ? (
-                                                <input type="text" value={editForm.description} onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))} className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                            ) : (
-                                                <div className="text-sm text-gray-500 w-full sm:w-auto break-words">{department.description}</div>
-                                            )}
+                                            <div className="text-sm text-gray-500 w-full sm:w-auto break-words">{department.description}</div>
                                         </td>
                                         <td className="px-4 py-4 text-right whitespace-nowrap">
-                                            {editingDepartment === department.id ? (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button onClick={() => handleUpdate(department)} className="text-green-600 hover:text-green-900">
-                                                        <SaveIcon className="h-5 w-5" />
-                                                    </button>
-                                                    <button onClick={() => setEditingIdDepartment(null)} className="text-gray-600 hover:text-gray-900">
-                                                        <CloseIcon className="h-5 w-5" />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex justify-end space-x-3">
-                                                    <button onClick={() => handleStartEdit(department)} className="text-blue-600 hover:text-blue-900">
-                                                        <PencilIcon className="h-5 w-5" />
-                                                    </button>
-                                                    <button onClick={() => handleStartDelete(department.id)} className="text-red-600 hover:text-red-900">
-                                                        <TrashIcon className="h-5 w-5" />
-                                                    </button>
-                                                </div>
-                                            )}
+                                            <div className="flex justify-end space-x-3">
+                                                <button onClick={() => handleStartEdit(department)} className="text-blue-600 hover:text-blue-900">
+                                                    <PencilIcon className="h-5 w-5" />
+                                                </button>
+                                                <button onClick={() => handleStartDelete(department.id)} className="text-red-600 hover:text-red-900">
+                                                    <TrashIcon className="h-5 w-5" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

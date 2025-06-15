@@ -3,10 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeftIcon, SearchIcon, FilterIcon, PrinterIcon, DownloadIcon, ChevronDownIcon, FileTextIcon, CalendarIcon, UserIcon } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AdminContext } from "../../context/AdminContext";
+import { ClinicContext } from "../../context/ClinicContext";
 
-const ViewMedicalRecord = () => {
-    const { backendUrl, aToken, formatDateHeader, doctorData } = useContext(AdminContext);
+const ClinicViewMedicalRecord = () => {
+    const { backendUrl, cToken, formatDateHeader, doctorData } = useContext(ClinicContext);
 
     console.log("doctorData", doctorData);
 
@@ -69,7 +69,7 @@ const ViewMedicalRecord = () => {
         try {
             const url = backendUrl + `/api/medicalRecords/getRecord/${patientId}`;
             let headers = {
-                Authorization: "Bearer " + aToken,
+                Authorization: "Bearer " + cToken,
             };
             const { data } = await axios.get(url, {
                 headers: headers,
@@ -81,7 +81,7 @@ const ViewMedicalRecord = () => {
 
     const getUserByUserId = async (patientId) => {
         try {
-            let headers = { Authorization: "Bearer " + aToken };
+            let headers = { Authorization: "Bearer " + cToken };
             const { data } = await axios.get(`${backendUrl}/api/doctor/getUser/${patientId}`, {
                 headers,
             });
@@ -100,18 +100,18 @@ const ViewMedicalRecord = () => {
         if (patientId) {
             getUserByUserId(patientId);
         }
-    }, [patientId, aToken]);
+    }, [patientId, cToken]);
 
     useEffect(() => {
         getMedicalRecord(patientId);
-    }, [patientId, aToken]);
+    }, [patientId, cToken]);
 
     return (
         <div className="min-h-screen bg-gray-100 py-8 w-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 flex items-center justify-between">
                     <div className="flex items-center">
-                        <Link to="/admin/patient" className="flex items-center text-blue-600 hover:text-blue-800">
+                        <Link to="/clinic/patient" className="flex items-center text-blue-600 hover:text-blue-800">
                             <ArrowLeftIcon className="w-5 h-5 mr-2" />
                             Quay lại
                         </Link>
@@ -292,4 +292,4 @@ const ViewMedicalRecord = () => {
         </div>
     );
 };
-export default ViewMedicalRecord;
+export default ClinicViewMedicalRecord;

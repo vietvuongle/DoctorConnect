@@ -1,18 +1,23 @@
 import React, { useContext, useState } from "react";
-import { DoctorContext } from "../../context/DoctorContext";
 import { useNavigate } from "react-router-dom";
+import { ClinicContext } from "../../context/ClinicContext";
 
-const Patient = () => {
-    const { appointmentData, calculateAge, formatDateHeader, removeVietnameseTones } = useContext(DoctorContext);
+const ClinicPatient = () => {
+    const { appointmentData, calculateAge, formatDateHeader, removeVietnameseTones } = useContext(ClinicContext);
+
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const clinicId = localStorage.getItem("clinicId");
 
     const navigate = useNavigate();
 
-    const [searchTerm, setSearchTerm] = useState("");
+    // Lọc ra các appointment đã hoàn thành
+    console.log("appointmentData", appointmentData);
 
     const seenUserIds = new Set();
 
     const completedAppointments = appointmentData.filter((appointment) => {
-        if (appointment.completed && !seenUserIds.has(appointment.userId)) {
+        if (appointment.completed && appointment.clinicId === clinicId && !seenUserIds.has(appointment.userId)) {
             seenUserIds.add(appointment.userId);
             return true;
         }
@@ -79,6 +84,7 @@ const Patient = () => {
                         placeholder="Tìm kiếm bệnh nhân..."
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     />
+
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -132,7 +138,7 @@ const Patient = () => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     <button
                                         onClick={() => {
-                                            navigate(`/doctor/patient/${appointment.userId}`);
+                                            navigate(`/clinic/patient/${appointment.userId}`);
                                             scrollTo(0, 0);
                                         }}
                                         className="text-white bg-primary border p-2 ml-6 rounded-full hover:opacity-80"
@@ -171,4 +177,4 @@ const Patient = () => {
     );
 };
 
-export default Patient;
+export default ClinicPatient;
