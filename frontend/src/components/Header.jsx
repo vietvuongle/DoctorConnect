@@ -40,6 +40,9 @@ export function Header() {
                         <NavLink to="/departments" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
                             Khoa
                         </NavLink>
+                        <NavLink to="/clinics" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
+                            Phòng khám
+                        </NavLink>
 
                         <NavLink to="/appointment" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
                             Đặt lịch

@@ -117,10 +117,16 @@ export function BookingPage() {
 
             const slots = data.result;
 
+            const now = new Date();
+            const currentTimeStr = now.toTimeString().slice(0, 5); // "HH:mm"
+
             const slotTimes = slots
-                .filter((slot) => !slot.booked) // chỉ lấy lịch chưa được đặt
+                .filter((slot) => {
+                    const slotTime = slot.startTime.slice(0, 5); // "HH:mm"
+                    return !slot.booked && slotTime > currentTimeStr;
+                })
                 .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                .map((slot) => `${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}`); // "16:00 - 17:00"
+                .map((slot) => `${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}`);
 
             setSlotOptions(slotTimes);
         } catch (error) {
@@ -166,6 +172,7 @@ export function BookingPage() {
                                         key={doctor.id}
                                         onClick={() => {
                                             setSelectedDoctor(doctor.id);
+                                            fetchSchedulesFromDB(selectedDate, doctor.id);
                                             setPrice(doctor.fees);
                                             fetchSchedulesFromDB(selectedDate, doctor.id);
                                             setErrors({}); // Clear errors

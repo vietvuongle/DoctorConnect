@@ -16,6 +16,8 @@ const ClinicAddDoctor = () => {
 
     const navigate = useNavigate();
 
+    const clinicId = localStorage.getItem("clinicId");
+
     const [docImg, setDocImg] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -33,8 +35,6 @@ const ClinicAddDoctor = () => {
     const { backendUrl, departmentData } = useContext(AdminContext);
     const { doctorData, cToken, getDoctorDataByClinicId } = useContext(ClinicContext);
 
-    const clinnicId = localStorage.getItem("clinicId");
-
     const onSubmitHandler = async (e) => {
         e.preventDefault();
 
@@ -47,7 +47,7 @@ const ClinicAddDoctor = () => {
             const cleanedFees = fees.replace(/\./g, "");
 
             const formData = new FormData();
-            formData.append("clinicId", clinnicId);
+            formData.append("clinicId", clinicId);
             formData.append("image", docImg);
             formData.append("name", name);
             formData.append("email", email);

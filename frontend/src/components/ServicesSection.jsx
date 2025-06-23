@@ -3,7 +3,7 @@ import { Stethoscope as StethoscopeIcon, Heart as HeartIcon, Brain as BrainIcon,
 import { assets } from "../assets/assets";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function ServicesSection() {
     const { handleSmoothScroll } = useContext(AppContext);
@@ -42,6 +42,7 @@ export function ServicesSection() {
     ];
 
     const { departmentData } = useContext(AppContext);
+    const navigate = useNavigate();
 
     return (
         <section id="services" className="py-16 bg-white">
@@ -63,6 +64,17 @@ export function ServicesSection() {
                             </div>
                         </div>
                     ))}
+                </div>
+                <div className="mt-12 text-center">
+                    <button
+                        onClick={() => {
+                            navigate("/departments");
+                            handleSmoothScroll();
+                        }}
+                        className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                    >
+                        Xem thêm
+                    </button>
                 </div>
             </div>
         </section>

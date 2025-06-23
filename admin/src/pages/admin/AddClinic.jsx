@@ -23,7 +23,7 @@ const AddClinic = () => {
     const [address, setAddress] = useState("");
     const [description, setDescription] = useState("");
 
-    const { backendUrl, aToken, clinicData } = useContext(AdminContext);
+    const { backendUrl, aToken, clinicData, getAllClinic } = useContext(AdminContext);
 
     const validateForm = () => {
         const errors = {};
@@ -62,7 +62,8 @@ const AddClinic = () => {
                 },
             });
 
-            if (data.success) {
+            if (data !== false) {
+                getAllClinic();
                 toast.success("Thêm phòng khám thành công");
                 setDocImg(null);
                 setName("");
@@ -241,7 +242,7 @@ const AddClinic = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{clinic.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{clinic.address}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 truncate max-w-[240px] overflow-hidden text-ellipsis">{clinic.address}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{clinic.status === "APPROVED" && <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Hoạt động</span>}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button onClick={() => navigate(`/admin/clinic/${clinic.id}`)} className="text-blue-600 hover:text-blue-900 mr-3">

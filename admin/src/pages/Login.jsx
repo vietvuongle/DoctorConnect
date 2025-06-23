@@ -51,7 +51,7 @@ const Login = () => {
                     localStorage.setItem("cToken", token);
                     setCToken(token);
                     toast.success("Đăng nhập thành công");
-                    navigate("/clinic/add-doctor");
+                    navigate("/clinic/dashboard");
                 } else {
                     toast.error("Sai email hoặc mật khẩu");
                 }
