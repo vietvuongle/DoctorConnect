@@ -324,7 +324,7 @@ const DoctorDetail = () => {
                             <div className="flex justify-between items-end gap-2">
                                 <div className=" flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <Link to="/clinic/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                        <Link to="/admin/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                                             <ArrowLeftIcon className="w-5 h-5 mr-2" />
                                             Quay lại
                                         </Link>

@@ -10,7 +10,6 @@ import { ClinicContext } from "../../context/ClinicContext";
 
 const DoctorSchedule = () => {
     const { cToken, backendUrl, doctorData } = useContext(ClinicContext);
-
     const { doctorId } = useParams();
 
     const doctorName = doctorData?.find((doc) => doc.id === doctorId)?.name;
@@ -19,16 +18,15 @@ const DoctorSchedule = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [schedules, setSchedules] = useState({});
     const [bookedSlotsFromDB, setBookedSlotsFromDB] = useState([]);
-    const [newSlot, setNewSlot] = useState({ start: "08:00", end: "09:00" }); // For adding new slots
+    const [newSlot, setNewSlot] = useState({ start: "06:30", end: "07:00" });
 
-    // Default time slots (initial slots for a day if none exist in DB)
     const defaultTimeSlots = [
-        { start: "08:00:00", end: "09:00:00", status: "available" },
-        { start: "09:00:00", end: "10:00:00", status: "available" },
-        { start: "10:00:00", end: "11:00:00", status: "available" },
-        { start: "14:00:00", end: "15:00:00", status: "available" },
-        { start: "15:00:00", end: "16:00:00", status: "available" },
-        { start: "16:00:00", end: "17:00:00", status: "available" },
+        { start: "08:00", end: "09:00", status: "available" },
+        { start: "09:00", end: "10:00", status: "available" },
+        { start: "10:00", end: "11:00", status: "available" },
+        { start: "14:00", end: "15:00", status: "available" },
+        { start: "15:00", end: "16:00", status: "available" },
+        { start: "16:00", end: "17:00", status: "available" },
     ];
 
     const getWeekDays = (date) => {
@@ -46,35 +44,31 @@ const DoctorSchedule = () => {
         setCurrentDate(addWeeks(currentDate, 1));
     };
 
-    // Kiểm tra ngày chọn phải >= hôm nay
     const isDateSelectable = (date) => {
         const today = startOfDay(new Date());
         return !isBefore(date, today);
     };
 
-    // Kiểm tra khung giờ trong ngày hôm nay phải lớn hơn giờ hiện tại + 2 tiếng
     const isTimeSlotInFuture = (date, startTime) => {
-        const nowPlus2h = addHours(new Date(), 1); // Current time is 06:27 PM +07, so 08:27 PM
+        const nowPlus2h = addHours(new Date(), 1);
         const [hour, minute] = startTime.split(":").map(Number);
         const slotDateTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, minute);
         return isAfter(slotDateTime, nowPlus2h);
     };
 
-    // Hàm kiểm tra khung giờ đã có trong DB
     const isSlotAlreadyBookedInDB = (start, end) => {
-        return bookedSlotsFromDB.some((slot) => slot.startTime === `${start}` && slot.endTime === `${end}`);
+        return bookedSlotsFromDB.some((slot) => slot.startTime === `${start}:00` && slot.endTime === `${end}:00`);
     };
 
-    // Hàm lấy danh sách khung giờ từ DB
     const fetchSchedulesFromDB = async (dateStr) => {
         try {
             const url = `${backendUrl}/api/doctor/available/${doctorId}?slotDate=${dateStr}`;
             const headers = { Authorization: `Bearer ${cToken}` };
             const { data } = await axios.get(url, { headers });
-
             return data.code === 1000 ? data.result : [];
         } catch (error) {
             console.error("Lỗi khi gọi API:", error);
+            toast.error("Không thể tải lịch khám!");
             return [];
         }
     };
@@ -85,49 +79,52 @@ const DoctorSchedule = () => {
         setSelectedDate(date);
         const dateStr = format(date, "yyyy-MM-dd");
 
-        // Gọi API và lấy kết quả từ DB
-        const bookedSlots = await fetchSchedulesFromDB(dateStr); // Chỉnh fetchSchedulesFromDB để return
-
-        // Gán bookedSlots vào state
+        const bookedSlots = await fetchSchedulesFromDB(dateStr);
         setBookedSlotsFromDB(bookedSlots);
 
-        // Khởi tạo nếu chưa có
-        if (!schedules[dateStr]) {
-            const updatedSlots = defaultTimeSlots.map((slot) => {
-                const existsInDB = bookedSlots.some((s) => s.startTime === `${slot.start}` && s.endTime === `${slot.end}`);
-                const dbSlot = bookedSlots.find((s) => s.startTime === `${slot.start}` && s.endTime === `${slot.end}`);
-
+        setSchedules((prev) => {
+            const existingSlots = prev[dateStr] || defaultTimeSlots;
+            const updatedSlots = existingSlots.map((slot) => {
+                const existsInDB = bookedSlots.some((s) => s.startTime === `${slot.start}:00` && s.endTime === `${slot.end}:00`);
+                const dbSlot = bookedSlots.find((s) => s.startTime === `${slot.start}:00` && s.endTime === `${slot.end}:00`);
                 return {
                     ...slot,
                     status: existsInDB ? (dbSlot.booked ? "booked" : "available") : slot.status,
                 };
             });
-            setSchedules((prev) => ({
+            return {
                 ...prev,
                 [dateStr]: updatedSlots,
-            }));
-        }
+            };
+        });
     };
 
-    const handleTimeSlotStatusChange = (dateStr, index, newStatus) => {
+    const handleTimeSlotStatusChange = (dateStr, slotStart, newStatus) => {
         setSchedules((prev) => ({
             ...prev,
-            [dateStr]: prev[dateStr].map((slot, i) => (i === index ? { ...slot, status: newStatus } : slot)),
+            [dateStr]: prev[dateStr].map((slot) => (slot.start === slotStart ? { ...slot, status: newStatus } : slot)),
         }));
     };
 
-    // Hàm thêm khung giờ mới
     const handleAddNewSlot = () => {
-        if (!selectedDate) return;
+        if (!selectedDate) {
+            toast.error("Vui lòng chọn ngày!");
+            return;
+        }
 
         const dateStr = format(selectedDate, "yyyy-MM-dd");
         const newSlotToAdd = { start: newSlot.start, end: newSlot.end, status: "available" };
 
-        // Kiểm tra xem slot đã tồn tại chưa
+        const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+        if (isToday && !isTimeSlotInFuture(selectedDate, newSlot.start)) {
+            toast.error("Khung giờ phải sau thời điểm hiện tại ít nhất 1 tiếng!");
+            return;
+        }
+
         const slotExists = schedules[dateStr]?.some((slot) => slot.start === newSlot.start && slot.end === newSlot.end) || isSlotAlreadyBookedInDB(newSlot.start, newSlot.end);
 
         if (slotExists) {
-            alert("Khung giờ này đã tồn tại!");
+            toast.error("Khung giờ này đã tồn tại!");
             return;
         }
 
@@ -135,67 +132,88 @@ const DoctorSchedule = () => {
             ...prev,
             [dateStr]: [...(prev[dateStr] || []), newSlotToAdd].sort((a, b) => a.start.localeCompare(b.start)),
         }));
-        setNewSlot({ start: "08:00", end: "09:00" }); // Reset form
+        setNewSlot({ start: "06:30", end: "07:00" });
+        toast.success("Thêm khung giờ thành công!");
     };
 
-    // Hàm xóa khung giờ
     const handleDeleteSlot = async (slot) => {
         if (!selectedDate) return;
 
         const dateStr = format(selectedDate, "yyyy-MM-dd");
-        const slotInDB = bookedSlotsFromDB.find((s) => s.startTime === `${slot.start}` && s.endTime === `${slot.end}`);
+        const slotInDB = bookedSlotsFromDB.find((s) => s.startTime === `${slot.start}:00` && s.endTime === `${slot.end}:00`);
 
         if (slotInDB) {
-            // Xóa từ DB nếu khung giờ đã tồn tại trong DB
             try {
                 const url = `${backendUrl}/api/doctor/delete-schedule/${slotInDB.id}`;
                 const headers = { Authorization: `Bearer ${cToken}` };
                 const { data } = await axios.delete(url, { headers });
 
                 if (data.code === 1000) {
-                    toast.success("Hủy lịch thành công");
-                    handleDateClick(selectedDate);
+                    toast.success("Hủy lịch thành công!");
+                    // Làm mới dữ liệu từ DB
+                    const bookedSlots = await fetchSchedulesFromDB(dateStr);
+                    setBookedSlotsFromDB(bookedSlots);
+                    // Gọi handleDateClick để đồng bộ schedules với DB
+                    await handleDateClick(selectedDate);
                 } else {
-                    console.error("Failed to delete slot:", data.message);
+                    toast.error("Không thể hủy lịch: " + data.message);
+                    // Khôi phục state nếu xóa thất bại
+                    await handleDateClick(selectedDate);
                 }
             } catch (error) {
                 console.error("Error deleting slot:", error);
+                toast.error("Lỗi khi hủy lịch!");
+                // Khôi phục state nếu có lỗi
+                await handleDateClick(selectedDate);
             }
+        } else {
+            // Nếu slot không có trong DB, chỉ cần làm mới giao diện
+            await handleDateClick(selectedDate);
         }
     };
 
     const handleSaveSchedule = async () => {
-        if (!selectedDate) return;
+        if (!selectedDate) {
+            toast.error("Vui lòng chọn ngày!");
+            return;
+        }
 
         const dateStr = format(selectedDate, "yyyy-MM-dd");
-        const slotsToSave = schedules[dateStr].filter((slot) => slot.status === "available" && !isSlotAlreadyBookedInDB(slot.start, slot.end));
+        const slotsToSave = schedules[dateStr].filter((slot) => slot.status === "available" && !isSlotAlreadyBookedInDB(slot.start, slot.end) && isTimeSlotInFuture(selectedDate, slot.start));
+
+        console.log("Slots:", slotsToSave);
 
         if (slotsToSave.length === 0) {
-            console.log("No new slots to save");
+            toast.info("Không có khung giờ mới để lưu!");
             return;
         }
 
         try {
             const url = `${backendUrl}/api/doctor/create-schedule`;
             const headers = { Authorization: `Bearer ${cToken}` };
+
             const payload = {
                 doctorId,
                 slotDate: dateStr,
                 slots: slotsToSave.map((slot) => ({
-                    startTime: `${slot.start}`,
-                    endTime: `${slot.end}`,
+                    startTime: `${slot.start}:00`,
+                    endTime: `${slot.end}:00`,
                 })),
             };
 
+            console.log("Payload to save:", payload);
+
             const { data } = await axios.post(url, payload, { headers });
             if (data.code === 1000) {
-                toast.success("Thêm lịch khám thành công");
-                await fetchSchedulesFromDB(dateStr);
+                toast.success("Thêm lịch khám thành công!");
+                const bookedSlots = await fetchSchedulesFromDB(dateStr);
+                setBookedSlotsFromDB(bookedSlots);
             } else {
-                console.error("Failed to save schedule:", data.message);
+                toast.error("Không thể lưu lịch: " + data.message);
             }
         } catch (error) {
             console.error("Error saving schedule:", error);
+            toast.error("Lỗi khi lưu lịch!");
         }
     };
 
@@ -240,7 +258,7 @@ const DoctorSchedule = () => {
                     {selectedDate && (
                         <div className="p-6">
                             <h3 className="text-lg font-medium text-gray-900 mb-4">Lịch làm việc ngày {format(selectedDate, "dd/MM/yyyy", { locale: vi })}</h3>
-                            {/* <div className="mb-4 flex items-center space-x-4">
+                            <div className="mb-4 flex items-center space-x-4">
                                 <h4 className="text-md font-medium">Thêm khung giờ mới:</h4>
                                 <input type="time" value={newSlot.start} onChange={(e) => setNewSlot({ ...newSlot, start: e.target.value })} className="border rounded-lg p-2" />
                                 <span>-</span>
@@ -249,14 +267,14 @@ const DoctorSchedule = () => {
                                     <PlusIcon className="w-5 h-5 mr-2" />
                                     Thêm
                                 </button>
-                            </div> */}
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {schedules[format(selectedDate, "yyyy-MM-dd")]
                                     ?.filter((slot) => {
                                         const isToday = format(selectedDate, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
                                         return isToday ? isTimeSlotInFuture(selectedDate, slot.start) : true;
                                     })
-                                    .map((slot, index) => {
+                                    .map((slot) => {
                                         const dateStr = format(selectedDate, "yyyy-MM-dd");
                                         const alreadyInDB = isSlotAlreadyBookedInDB(slot.start, slot.end);
                                         const dbSlot = alreadyInDB ? bookedSlotsFromDB.find((s) => s.startTime === `${slot.start}:00` && s.endTime === `${slot.end}:00`) : null;
@@ -264,7 +282,7 @@ const DoctorSchedule = () => {
                                         const isEditable = !alreadyInDB;
 
                                         return (
-                                            <div key={index} className={`border gap-1 rounded-lg p-4 flex items-center justify-between ${alreadyInDB ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed" : "hover:border-blue-300"}`}>
+                                            <div key={slot.start} className={`border gap-1 rounded-lg p-4 flex items-center justify-between ${alreadyInDB ? "bg-gray-100 border-gray-300 opacity-70 cursor-not-allowed" : "hover:border-blue-300"}`}>
                                                 <div className="flex items-center">
                                                     <ClockIcon className="w-5 h-5 text-gray-400 mr-2" />
                                                     <span className={`text-gray-900 ${alreadyInDB ? "text-gray-500" : ""}`}>
@@ -274,10 +292,10 @@ const DoctorSchedule = () => {
                                                 <div className="flex space-x-2">
                                                     {isEditable && (
                                                         <>
-                                                            <button onClick={() => handleTimeSlotStatusChange(dateStr, index, "available")} className={`p-2 rounded-full ${slot.status === "available" ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                                                            <button onClick={() => handleTimeSlotStatusChange(dateStr, slot.start, "available")} className={`p-2 rounded-full ${slot.status === "available" ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
                                                                 <CheckIcon className="w-4 h-4" />
                                                             </button>
-                                                            <button onClick={() => handleTimeSlotStatusChange(dateStr, index, "unavailable")} className={`p-2 rounded-full ${slot.status === "unavailable" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}>
+                                                            <button onClick={() => handleTimeSlotStatusChange(dateStr, slot.start, "booked")} className={`p-2 rounded-full ${slot.status === "booked" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}>
                                                                 <XIcon className="w-4 h-4" />
                                                             </button>
                                                         </>
@@ -298,7 +316,7 @@ const DoctorSchedule = () => {
                     )}
                 </div>
             </div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 px- 4 mt-5 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5 flex items-center justify-between">
                 <div className="flex items-center">
                     <Link to="/clinic/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         <ArrowLeftIcon className="w-5 h-5 mr-2" />

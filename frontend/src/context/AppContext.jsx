@@ -30,9 +30,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getDepartment = async () => {
@@ -43,9 +41,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getDoctorData = async () => {
@@ -56,9 +52,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getClinicData = async () => {
@@ -70,9 +64,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getAppointments = async () => {
@@ -112,9 +104,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            console.error("Lỗi khi gọi API user profile:", error.message);
-        }
+        } catch (error) {}
     };
 
     const getTopReview = async () => {
@@ -126,9 +116,7 @@ const AppContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            console.error("Lỗi khi gọi API user profile:", error.message);
-        }
+        } catch (error) {}
     };
 
     const formatDateHeader = (dateString) => {
@@ -143,6 +131,14 @@ const AppContextProvider = (props) => {
     const handleSmoothScroll = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
+
+    function removeVietnameseTones(str) {
+        return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D");
+    }
 
     const value = {
         backendUrl,
@@ -160,6 +156,7 @@ const AppContextProvider = (props) => {
         getTopReview,
         handleSmoothScroll,
         clinicData,
+        removeVietnameseTones,
     };
 
     useEffect(() => {

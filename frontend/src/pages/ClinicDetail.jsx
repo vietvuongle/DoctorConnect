@@ -1,43 +1,40 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { MapPinIcon, MailIcon, ClockIcon, PhoneIcon, StethoscopeIcon } from "lucide-react";
 import { AppContext } from "../context/AppContext";
 import { useParams } from "react-router-dom";
-const ClinicDetail = () => {
-    const { clinicData } = useContext(AppContext);
+import axios from "axios";
+import { toast } from "react-toastify";
+import DoctorByClinicSection from "../components/DoctorByClinicSection";
 
-    console.log("clinicData", clinicData);
+const ClinicDetail = () => {
+    const { clinicData, token, backendUrl } = useContext(AppContext);
+
+    const [doctorData, setDoctorData] = useState([]);
 
     const { id } = useParams();
+
+    const getDoctorDataByClinicId = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + `/api/clinic/all-doctor/${id}`);
+
+            if (data !== false) {
+                setDoctorData(data.result);
+                console.log("doctorData", data.result);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     const clinicDataByClinicId = clinicData.find((clinic) => clinic.id === id);
 
     // Mock data for doctors
-    const doctors = [
-        {
-            id: 1,
-            name: "GS, TS Hà Văn Quyết",
-            speciality: "Tiêu hóa",
-            image: "http://res.cloudinary.com/dexo8mq5w/image/upload/v1746167696/Image/j9li8vccvnivgbthfcot.png",
-            experience: "30 năm",
-            degree: "Giáo sư, Tiến sĩ",
-        },
-        {
-            id: 2,
-            name: "BSCKI Lê Trọng Hậu",
-            speciality: "Ung bướu",
-            image: "http://res.cloudinary.com/dexo8mq5w/image/upload/v1746167696/Image/j9li8vccvnivgbthfcot.png",
-            experience: "15 năm",
-            degree: "Bác sĩ Chuyên khoa I",
-        },
-        {
-            id: 3,
-            name: "ThS. BS Trần Đức Cảnh",
-            speciality: "Nội tiết",
-            image: "http://res.cloudinary.com/dexo8mq5w/image/upload/v1746167696/Image/j9li8vccvnivgbthfcot.png",
-            experience: "20 năm",
-            degree: "Thạc sĩ, Bác sĩ",
-        },
-    ];
+
+    useEffect(() => {
+        getDoctorDataByClinicId();
+    }, []);
 
     return (
         clinicDataByClinicId && (
@@ -48,12 +45,12 @@ const ClinicDetail = () => {
                     <div className="absolute inset-0 bg-black bg-opacity-50" />
                     <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
                         <h1 className="text-3xl font-bold mb-2">{clinicDataByClinicId.name}</h1>
-                        <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                                <MapPinIcon className="w-5 h-5 mr-2" />
+                        <div className=" items-center space-x-4">
+                            <div className="flex items-center ml-4">
+                                <MapPinIcon className="w-5 h-5 mr-2 " />
                                 <span>{clinicDataByClinicId.address}</span>
                             </div>
-                            <div className="flex items-center">
+                            <div className="flex items-center ">
                                 <MailIcon className="w-5 h-5 mr-2" />
                                 <span>{clinicDataByClinicId.email}</span>
                             </div>
@@ -87,13 +84,7 @@ const ClinicDetail = () => {
                                             <p className="text-gray-600">{clinicDataByClinicId.address}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-start">
-                                        <PhoneIcon className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0 mt-1" />
-                                        <div>
-                                            <p className="font-medium">Hotline</p>
-                                            <p className="text-gray-600">1900 1234</p>
-                                        </div>
-                                    </div>
+
                                     <div className="flex items-start">
                                         <MailIcon className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0 mt-1" />
                                         <div>
@@ -106,25 +97,7 @@ const ClinicDetail = () => {
                         </div>
                     </div>
                     {/* Doctors Section */}
-                    <div className="mt-12">
-                        <h2 className="text-2xl font-bold mb-6">Đội ngũ bác sĩ</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {doctors.map((doctor) => (
-                                <div key={doctor.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                                    <img src={doctor.image} alt={doctor.name} className="w-full h-48 object-cover" />
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-bold mb-2">{doctor.name}</h3>
-                                        <p className="text-blue-600 font-medium mb-2">{doctor.degree}</p>
-                                        <div className="space-y-2 text-gray-600">
-                                            <p>Chuyên khoa: {doctor.speciality}</p>
-                                            <p>Kinh nghiệm: {doctor.experience}</p>
-                                        </div>
-                                        <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Đặt lịch khám</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <DoctorByClinicSection doctorData={doctorData} />
                 </div>
 
                 <style>
@@ -134,7 +107,7 @@ const ClinicDetail = () => {
           }
           .tiptap-content {
             font-family: 'Calibri', 'Arial', sans-serif !important;
-            font-size: 11pt;
+            font-size: 13pt;
             line-height: 1.15;
             color: #2E2E2E;
           }

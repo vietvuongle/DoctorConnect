@@ -22,6 +22,7 @@ import DepartmentDetails from "./pages/DepartmentDetails";
 import Departments from "./pages/Departments";
 import Test from "./pages/Test";
 import ClinicDetail from "./pages/ClinicDetail";
+import ClinicList from "./pages/ClinicList";
 
 function App() {
     const location = useLocation();
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/doctors" element={<Doctors />} />
                 <Route path="/doctor/:id" element={<DoctorDetails />} />
+                <Route path="/clinics" element={<ClinicList />} />
                 <Route path="/clinic/:id" element={<ClinicDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<ServicePage />} />
