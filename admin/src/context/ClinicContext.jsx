@@ -28,9 +28,7 @@ const ClinicContextProvider = (props) => {
             } else {
                 toast.error("Có lỗi xảy ra");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getDoctorDataByClinicId = async () => {
@@ -48,9 +46,7 @@ const ClinicContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getAllAppointmentByClinicId = async () => {
@@ -63,9 +59,7 @@ const ClinicContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const calculateAge = (dobString) => {

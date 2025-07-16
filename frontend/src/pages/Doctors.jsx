@@ -1,11 +1,13 @@
 import React, { useContext, useState } from "react";
 import { Search as SearchIcon, Filter as FilterIcon, Star as StarIcon, Calendar as CalendarIcon } from "lucide-react";
 import { AppContext } from "../context/AppContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Doctors() {
-    const { departmentData, handleSmoothScroll } = useContext(AppContext);
+    const { departmentData, handleSmoothScroll, clinicData } = useContext(AppContext);
     const { doctorData } = useContext(AppContext);
+
+    const navigate = useNavigate();
 
     const [selectedSpecialty, setSelectedSpecialty] = useState("Tất cả chuyên khoa");
     const [searchQuery, setSearchQuery] = useState("");
@@ -26,6 +28,11 @@ export function Doctors() {
         // Chỉ giữ lại bác sĩ thỏa cả 2 điều kiện
         return matchesSpecialty && matchesSearch;
     });
+
+    const getClinicNameById = (id) => {
+        const clinic = clinicData.find((c) => c.id === id);
+        return clinic ? clinic.address : "Không rõ";
+    };
 
     return (
         <div className="py-8 bg-gray-50">
@@ -55,46 +62,22 @@ export function Doctors() {
                     </div>
                 </div>
                 {/* Doctors List */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredDoctors.map((doctor, index) => (
-                        <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <div className="flex flex-col md:flex-row">
-                                <div className="md:w-1/3">
-                                    <img src={doctor.image} alt={doctor.name} className="w-full md:h-full sm:w-48 sm:h-48 object-cover" />
-                                </div>
-                                <div className="md:w-2/3 p-6">
-                                    <div className="p-6">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                {/* <Link to={`/doctor/${doctor.id}`}> */}
-                                                <h2 className="text-xl font-semibold text-gray-800 hover:underline">Bác Sĩ: {doctor.name}</h2>
-                                                {/* </Link> */}
-                                                <p className="text-blue-600">{doctor.speciality}</p>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <StarIcon className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                                                <span className="ml-1 text-gray-600">{doctor.rating}</span>
-                                                <span className="text-gray-400 text-sm ml-1">({doctor.reviewCount})</span>
-                                            </div>
-                                        </div>
-                                        <div className="mb-4">
-                                            <p className="text-gray-600 text-sm mb-1">{doctor.experience} kinh nghiệm</p>
-                                            <p className="text-gray-600 text-sm mb-1">Trường đại học y dược Huế</p>
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{doctor.degree}</span>
-                                                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">{doctor.degree}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                            <div className="flex items-center text-green-600"></div>
-                                            <Link to={`/doctor/${doctor.id}`}>
-                                                <button onClick={() => handleSmoothScroll()} className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto">
-                                                    Xem chi tiết
-                                                </button>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {filteredDoctors.map((item, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            <img
+                                onClick={() => {
+                                    navigate(`/doctor/${item.id}`);
+                                    handleSmoothScroll();
+                                }}
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-64 object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="p-6">
+                                <h3 className="text-xl font-semibold text-gray-800 mb-1">{item.name}</h3>
+                                <p className="text-blue-600 font-medium mb-2">{item.speciality}</p>
+                                <p className="text-gray-600 mb-3">Địa chỉ: {getClinicNameById(item.clinicId)}</p>
                             </div>
                         </div>
                     ))}

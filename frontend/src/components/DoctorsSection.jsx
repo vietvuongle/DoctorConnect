@@ -23,7 +23,6 @@ export function DoctorsSection() {
                             <div className="p-6">
                                 <h3 className="text-xl font-semibold text-gray-800 mb-1">{item.name}</h3>
                                 <p className="text-blue-600 font-medium mb-2">{item.speciality}</p>
-                                <p className="text-gray-600 text-sm mb-4">{item.experience} kinh nghiệm</p>
                                 <button
                                     onClick={() => {
                                         navigate(`/doctor/${item.id}`);

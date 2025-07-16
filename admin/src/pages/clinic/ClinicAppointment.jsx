@@ -10,6 +10,9 @@ const ClinicAppointment = () => {
     const { doctorData, appointmentData, formatDateHeader, cToken, backendUrl, getAllAppointmentByClinicId } = useContext(ClinicContext);
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
+
     const itemsPerPage = 5; // Number of appointments per page
     const totalItems = appointmentData.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -136,16 +139,47 @@ const ClinicAppointment = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         {!appointment.confirm && (
-                                            <button onClick={() => confirmAppointment(appointment._id)} className="text-blue-600 hover:text-blue-900 mr-3">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAppointmentId(appointment._id);
+                                                    setShowConfirmModal(true);
+                                                }}
+                                                className="text-blue-600 hover:text-blue-900 mr-3"
+                                            >
                                                 Xác nhận
                                             </button>
                                         )}
+
                                         {!appointment.confirm && (
                                             <button onClick={() => cancelAppointment(appointment._id)} className="text-red-600 hover:text-red-900">
                                                 Hủy
                                             </button>
                                         )}
                                     </td>
+                                    {showConfirmModal && (
+                                        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+                                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                                                <h2 className="text-lg font-semibold mb-4">Xác nhận lịch hẹn</h2>
+                                                <p className="mb-4">
+                                                    Bạn đã liên hệ với khách hàng với số điện thoại <br /> <p className="text-blue-500">{appointment.phone} ?</p>
+                                                </p>
+                                                <div className="flex justify-end space-x-2">
+                                                    <button onClick={() => setShowConfirmModal(false)} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded">
+                                                        Hủy
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            confirmAppointment(selectedAppointmentId);
+                                                            setShowConfirmModal(false);
+                                                        }}
+                                                        className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded"
+                                                    >
+                                                        Đã liên hệ - Xác nhận
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>

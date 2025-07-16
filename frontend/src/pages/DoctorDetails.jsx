@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { MapPinIcon, MailIcon, ClockIcon, PhoneIcon, StethoscopeIcon } from "lucide-react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -11,9 +11,10 @@ export function DoctorDetails() {
     const userId = localStorage.getItem("userId");
     const [showBooking, setShowBooking] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [slotDate, setSlotDate] = useState(null);
+    const [slotDate, setSlotDate] = useState(new Date().toISOString().slice(0, 10));
     const [step, setStep] = useState(1);
-    const [appointmentWithDoctor, setAppointmentWithDoctor] = useState([]);
+    const [slotOptions, setSlotOptions] = useState([]);
+    const [slotId, setSlotId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -27,37 +28,43 @@ export function DoctorDetails() {
 
     const doctor = doctorData.find((d) => d.id === id);
 
-    const clinic = clinicData.find((c) => c.id === doctor?.clinicId);
+    console.log("Doctor Details:", doctor);
 
-    console.log("clinic", clinic);
+    const clinic = clinicData.find((c) => c.id === doctor?.clinicId);
 
     if (!doctor) {
         return <div className="container mx-auto px-4 py-8 text-center text-red-600 font-semibold text-lg">Không tìm thấy bác sĩ</div>;
     }
 
-    const getAppointmentByDoctorId = async (doctorId) => {
+    const fetchSchedulesFromDB = async (dateStr, doctorId) => {
         try {
-            if (!token) {
-                navigate("/login");
-                return;
-            }
-
-            const url = backendUrl + `/api/user/appointments/${doctorId}`;
-            let headers = {
-                Authorization: "Bearer " + token,
-            };
+            const url = `${backendUrl}/api/doctor/available/${doctorId}?slotDate=${dateStr}`;
+            const headers = { Authorization: `Bearer ${token}` };
             const { data } = await axios.get(url, { headers });
-            setAppointmentWithDoctor(data);
+
+            const slots = data.result;
+            console.log("Available slots:", slots);
+
+            const now = new Date();
+
+            const slotTimes = slots
+                .filter((slot) => {
+                    if (slot.booked) return false;
+
+                    const slotDateTimeStr = `${slot.slotDate}T${slot.startTime}`;
+                    const slotDateTime = new Date(slotDateTimeStr);
+
+                    return slotDateTime > now;
+                })
+                .sort((a, b) => a.startTime.localeCompare(b.startTime)); // giữ nguyên slot object
+
+            setSlotOptions(slotTimes);
+            console.log("Filtered and sorted slot options:", slotTimes);
         } catch (error) {
-            console.log(error);
+            console.error("Lỗi khi gọi API:", error);
+            return [];
         }
     };
-
-    const slots = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"];
-
-    const bookedTimes = appointmentWithDoctor.filter((app) => app.doctorId === id && app.slotDate === slotDate).map((app) => app.slotTime);
-
-    const availableTimeSlots = slots.filter((time) => !bookedTimes.includes(time));
 
     const handleBookingSubmit = async () => {
         try {
@@ -66,40 +73,33 @@ export function DoctorDetails() {
                 return;
             }
 
-            const payload = {
-                userId: userId || "",
-                doctorId: doctor.id,
-                slotDate,
-                slotTime: selectedSlot,
-                reason,
-                price: doctor.fees,
-                patientName,
-                email,
-                phone,
-                dob,
-                gender,
-                dateBooking: new Date().toISOString(),
+            const formData = new FormData();
+            formData.append("patientName", patientName);
+            formData.append("phone", phone);
+            formData.append("email", email);
+            formData.append("dob", dob);
+            formData.append("gender", gender);
+            formData.append("reason", reason);
+            formData.append("slotTime", selectedSlot);
+            formData.append("slotDate", slotDate);
+            formData.append("doctorId", doctor.id);
+            formData.append("price", Number(doctor.fees));
+            formData.append("userId", userId);
+            formData.append("clinicId", doctor.clinicId);
+            formData.append("slotId", slotId);
+
+            let headers = {
+                Authorization: "Bearer " + token,
             };
 
-            const response = await fetch("http://localhost:8081/api/appointments", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(payload),
-            });
+            const response = await axios.post(backendUrl + "/api/user/appointment", formData, { headers });
+            const { code, result } = response.data;
 
-            if (response.ok) {
-                toast.success("Đặt lịch thành công");
+            if (code === 1000 && result) {
                 getAppointments();
+                toast.success("Đặt lịch thành công");
             } else {
-                let errorMessage = "Đặt lịch thất bại";
-                try {
-                    const errorData = await response.json();
-                    if (errorData.message) errorMessage = errorData.message;
-                } catch {}
-                throw new Error(errorMessage);
+                setErrors({ general: "Đặt lịch thất bại. Vui lòng thử lại." });
             }
 
             setShowBooking(false);
@@ -162,7 +162,6 @@ export function DoctorDetails() {
                                         </div>
                                     </div>
                                 </div>
-                                <h2 className="text-4xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2 border-gray-200">Giới thiệu</h2>
                                 <div className="font-calibri overflow-y-auto p-4 bg-gray-50 rounded-md border border-gray-200 shadow-sm tiptap-content" dangerouslySetInnerHTML={{ __html: doctor.about }} />
                             </div>
                         </div>
@@ -193,7 +192,7 @@ export function DoctorDetails() {
                             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transform transition-all duration-300 hover:scale-105"
                             onClick={() => {
                                 setShowBooking(true);
-                                getAppointmentByDoctorId(id);
+                                fetchSchedulesFromDB(slotDate, id);
                                 if (!token) {
                                     navigate("/login");
                                 }
@@ -207,10 +206,10 @@ export function DoctorDetails() {
                 {/* Modal đặt lịch */}
                 {showBooking && (
                     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-                        <div className="bg-white rounded-2xl shadow-2xl p-8 w-[90%] max-w-lg max-h-[90vh] overflow-y-auto">
+                        <div className="bg-white rounded-2xl shadow-2xl p-8 w-[90%] max-w-2xl h-[90%] overflow-y-auto">
                             {/* Modal Header */}
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold text-gray-800">Đặt lịch khám với {doctor.name}</h2>
+                                <h2 className="text-2xl font-bold text-gray-800">Đặt lịch khám với bác sĩ {doctor.name}</h2>
                                 <button onClick={() => setShowBooking(false)} className="text-gray-500 hover:text-gray-700 text-3xl font-bold">
                                     ×
                                 </button>
@@ -230,33 +229,40 @@ export function DoctorDetails() {
                             {step === 1 && (
                                 <>
                                     <div className="mb-6">
-                                        <label className="block text-gray-700 font-medium mb-2">Chọn ngày khám:</label>
+                                        <label className="block text-gray-700 text-xl font-medium mb-2">Chọn ngày khám:</label>
                                         <input
                                             type="date"
                                             className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
                                             value={slotDate || ""}
-                                            onChange={(e) => setSlotDate(e.target.value)}
+                                            onChange={(e) => {
+                                                setSlotDate(e.target.value);
+                                                fetchSchedulesFromDB(e.target.value, id);
+                                            }}
                                             min={new Date().toISOString().split("T")[0]} // Prevent past dates
                                         />
                                     </div>
 
                                     <div className="mb-6">
-                                        <label className="block text-gray-700 font-medium mb-2">Chọn khung giờ:</label>
+                                        <label className="block text-gray-700 text-xl font-medium mb-2">Chọn khung giờ:</label>
+                                        {slotOptions.length === 0 && <div className="text-red-500 text-lg mt-5">Không có lịch trống của ngày hôm nay</div>}
                                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                            {availableTimeSlots.map((slot) => (
+                                            {slotOptions.map((slot) => (
                                                 <button
-                                                    key={slot}
+                                                    key={slot.id}
                                                     className={`py-2 px-3 rounded-xl border text-sm font-medium transition-all duration-200
-                                                    ${selectedSlot === slot ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"}`}
-                                                    onClick={() => setSelectedSlot(slot)}
+                                                                ${selectedSlot === `${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}` ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"}`}
+                                                    onClick={() => {
+                                                        setSelectedSlot(`${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}`);
+                                                        setSlotId(slot.id);
+                                                    }}
                                                 >
-                                                    {slot}
+                                                    {slot.startTime.slice(0, 5)} - {slot.endTime.slice(0, 5)}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end gap-3">
+                                    <div className="flex justify-end gap-3 mt-28">
                                         <button className="px-5 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition duration-200" onClick={() => setShowBooking(false)}>
                                             Hủy
                                         </button>

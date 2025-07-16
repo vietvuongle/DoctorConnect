@@ -5,13 +5,15 @@ import { BookingSteps } from "../components/BookingSteps";
 import { DoctorsSection } from "../components/DoctorsSection";
 import { TestimonialsSection } from "../components/TestimonialsSection";
 import { ContactSection } from "../components/ContactSection";
+import HealthcareFacilities from "../components/HealthcareFacilities";
 
 const Home = () => {
     return (
         <div>
             <HeroSection />
-            <ServicesSection />
             <BookingSteps />
+            <ServicesSection />
+            <HealthcareFacilities />
             <DoctorsSection />
             <TestimonialsSection />
             <ContactSection />

@@ -69,6 +69,7 @@ const ClinicDoctorDetail = () => {
             formData.append("phone", editForm.phone);
             formData.append("sex", editForm.sex);
             formData.append("school", editForm.school);
+            formData.append("clinicId", localStorage.getItem("clinicId"));
             if (editForm.image instanceof File) {
                 formData.append("image", editForm.image);
             }

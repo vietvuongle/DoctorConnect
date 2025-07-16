@@ -81,7 +81,7 @@ export function Footer() {
                             </li>
                             <li>
                                 <NavLink to="/contact" onClick={handleSmoothScroll} className="text-gray-300 hover:text-white transition-colors">
-                                    Liên hệ
+                                    Hợp tác
                                 </NavLink>
                             </li>
                         </ul>

@@ -44,12 +44,21 @@ export function Header() {
                             Phòng khám
                         </NavLink>
 
-                        <NavLink to="/appointment" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
+                        <NavLink
+                            to={token ? "/appointment" : "#"}
+                            onClick={(e) => {
+                                if (!token) {
+                                    e.preventDefault(); // Ngăn điều hướng
+                                    navigate("/login");
+                                }
+                            }}
+                            className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}
+                        >
                             Đặt lịch
                         </NavLink>
 
                         <NavLink to="/contact" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
-                            Liên hệ
+                            Hợp tác
                         </NavLink>
 
                         {token ? (

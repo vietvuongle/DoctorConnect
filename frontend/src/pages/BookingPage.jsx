@@ -13,7 +13,7 @@ const steps = [
 ];
 
 export function BookingPage() {
-    const { departmentData, doctorData, backendUrl, token, getAppointments } = useContext(AppContext);
+    const { departmentData, doctorData, backendUrl, token, getAppointments, clinicData } = useContext(AppContext);
     const navigate = useNavigate();
 
     const userId = localStorage.getItem("userId");
@@ -32,13 +32,22 @@ export function BookingPage() {
     const [dob, setDob] = useState("");
     const [price, setPrice] = useState(0);
     const [errors, setErrors] = useState({}); // State to track validation errors
+    const [slotId, setSlotId] = useState(null);
 
     const [slotOptions, setSlotOptions] = useState([]);
+
+    const doctor = doctorData.find((d) => d.id === selectedDoctor);
+    console.log("Selected doctor:", doctor);
 
     const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     const handleBack = () => {
         setErrors({}); // Clear errors when going back
         setCurrentStep((prev) => Math.max(prev - 1, 0));
+    };
+
+    const getClinicNameById = (id) => {
+        const clinic = clinicData.find((c) => c.id === id);
+        return clinic ? clinic.address : "Không rõ";
     };
 
     const validateForm = () => {
@@ -88,6 +97,8 @@ export function BookingPage() {
             formData.append("doctorId", selectedDoctor);
             formData.append("price", Number(price));
             formData.append("userId", userId);
+            formData.append("clinicId", doctor.clinicId);
+            formData.append("slotId", slotId);
 
             let headers = {
                 Authorization: "Bearer " + token,
@@ -116,17 +127,20 @@ export function BookingPage() {
             const { data } = await axios.get(url, { headers });
 
             const slots = data.result;
+            console.log("Available slots:", slots);
 
             const now = new Date();
-            const currentTimeStr = now.toTimeString().slice(0, 5); // "HH:mm"
 
             const slotTimes = slots
                 .filter((slot) => {
-                    const slotTime = slot.startTime.slice(0, 5); // "HH:mm"
-                    return !slot.booked && slotTime > currentTimeStr;
+                    if (slot.booked) return false;
+
+                    const slotDateTimeStr = `${slot.slotDate}T${slot.startTime}`;
+                    const slotDateTime = new Date(slotDateTimeStr);
+
+                    return slotDateTime > now;
                 })
-                .sort((a, b) => a.startTime.localeCompare(b.startTime))
-                .map((slot) => `${slot.startTime.slice(0, 5)} - ${slot.endTime.slice(0, 5)}`);
+                .sort((a, b) => a.startTime.localeCompare(b.startTime)); // giữ nguyên slot object
 
             setSlotOptions(slotTimes);
         } catch (error) {
@@ -181,10 +195,12 @@ export function BookingPage() {
                                     >
                                         <img src={doctor.image} alt={doctor.name} className="w-20 h-20 rounded-full object-cover mr-4" />
                                         <div className="text-left">
-                                            <h3 className="font-semibold text-gray-800 mb-3">{doctor.name}</h3>
+                                            <h3 className="font-semibold text-gray-800 mb-3">BS. {doctor.name}</h3>
                                             <p className="text-blue-600 mb-3">{doctor.speciality}</p>
                                             <p className="text-gray-600 mb-3">Giá: {Number(doctor.fees).toLocaleString("vi-VN")} vnđ</p>
+                                            <p className="text-gray-600 mb-3">Địa chỉ: {getClinicNameById(doctor.clinicId)}</p>
                                         </div>
+                                        <div></div>
                                     </button>
                                 ))
                         )}
@@ -217,12 +233,15 @@ export function BookingPage() {
                                         <button
                                             key={index}
                                             onClick={() => {
-                                                setSelectedTime(time);
+                                                setSelectedTime(`${time.startTime.slice(0, 5)} - ${time.endTime.slice(0, 5)}`);
+                                                setSlotId(time.id);
+                                                console.log("Selected slot time", time.id);
+
                                                 setErrors((prev) => ({ ...prev, selectedTime: "" }));
                                             }}
-                                            className={`px-4 py-2 border rounded-md text-sm ${selectedTime === time ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:border-blue-500"}`}
+                                            className={`px-4 py-2 border rounded-md text-sm ${selectedTime === `${time.startTime.slice(0, 5)} - ${time.endTime.slice(0, 5)}` ? "bg-blue-500 text-white border-blue-500" : "border-gray-300 hover:border-blue-500"}`}
                                         >
-                                            {time}
+                                            {time.startTime.slice(0, 5)} - {time.endTime.slice(0, 5)}
                                         </button>
                                     ))}
                                 </div>
