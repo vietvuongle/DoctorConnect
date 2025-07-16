@@ -59,8 +59,8 @@ export function ContactSection() {
             <section id="contact" className="py-16 bg-white">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-gray-800 mb-4">Liên hệ với chúng tôi</h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">Có thắc mắc hoặc cần hỗ trợ? Hãy liên hệ với chúng tôi qua thông tin bên dưới hoặc gửi tin nhắn trực tiếp.</p>
+                        <h2 className="text-3xl font-bold text-gray-800 mb-4">Hợp tác với chúng tôi</h2>
+                        <p className="text-gray-600 max-w-2xl mx-auto">Nếu bạn muốn hợp tác hoặc cần hỗ trợ? Hãy liên hệ với chúng tôi qua thông tin bên dưới.</p>
                     </div>
                     <div className="flex flex-col lg:flex-row gap-8">
                         <div className="lg:w-1/2 bg-blue-50 p-8 rounded-lg">

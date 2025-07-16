@@ -21,9 +21,7 @@ const AdminContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getDepartment = async () => {
@@ -35,9 +33,7 @@ const AdminContextProvider = (props) => {
             } else {
                 toast.error("Đã xảy ra lỗi");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getAllAppointment = async () => {
