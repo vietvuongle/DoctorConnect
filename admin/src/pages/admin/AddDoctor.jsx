@@ -5,10 +5,13 @@ import axios from "axios";
 import { AdminContext } from "../../context/AdminContext";
 import { PlusIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import TiptapEditor from "../../components/TiptapEditor";
 
 const AddDoctor = () => {
     const [isAddingNew, setIsAddingNew] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1); // Current page state
+    const [itemsPerPage] = useState(5); // Number of doctors per page
 
     const navigate = useNavigate();
 
@@ -23,7 +26,7 @@ const AddDoctor = () => {
     const [degree, setDegree] = useState("");
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
-    const [sex, setSex] = useState("");
+    const [sex, setSex] = useState("Nam");
     const [school, setSchool] = useState("");
 
     const { backendUrl, aToken, departmentData, doctorData } = useContext(AdminContext);
@@ -34,6 +37,7 @@ const AddDoctor = () => {
         try {
             if (!docImg) {
                 toast.error("Vui lòng chọn ảnh");
+                return;
             }
 
             const cleanedFees = fees.replace(/\./g, "");
@@ -53,14 +57,16 @@ const AddDoctor = () => {
             formData.append("school", school);
             formData.append("sex", sex);
 
-            formData.forEach((value, key) => {
-                console.log(`${key}:`, value);
+            const { data } = await axios.post(backendUrl + "/api/admin/add-doctor", formData, {
+                headers: {
+                    Authorization: `Bearer ${aToken}`,
+                    "Content-Type": "multipart/form-data",
+                },
             });
-
-            const { data } = await axios.post(backendUrl + "/api/admin/add-doctor", formData, { headers: { aToken } });
 
             if (data !== false) {
                 toast.success("Thêm bác sĩ thành công");
+
                 setDocImg(false);
                 setName("");
                 setEmail("");
@@ -74,15 +80,18 @@ const AddDoctor = () => {
                 setDegree("");
                 setAddress("");
                 setSchool("");
+                setCurrentPage(1); // Reset to first page after adding a doctor
             } else {
                 toast.error("Thêm bác sĩ thất bại!");
             }
-        } catch (error) {}
+        } catch (error) {
+            toast.error("Đã xảy ra lỗi khi thêm bác sĩ!");
+        }
     };
 
     const handleFeesChange = (e) => {
-        const rawValue = e.target.value.replace(/\./g, ""); // Xoá dấu chấm
-        if (!/^\d*$/.test(rawValue)) return; // Ngăn nhập ký tự không phải số
+        const rawValue = e.target.value.replace(/\./g, "");
+        if (!/^\d*$/.test(rawValue)) return;
 
         const formatted = Number(rawValue).toLocaleString("vi-VN");
         setFees(formatted);
@@ -90,10 +99,28 @@ const AddDoctor = () => {
 
     const filteredDoctors = doctorData.filter((doctor) => doctor.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
+    // Pagination logic
+    const indexOfLastDoctor = currentPage * itemsPerPage;
+    const indexOfFirstDoctor = indexOfLastDoctor - itemsPerPage;
+    const currentDoctors = filteredDoctors.slice(indexOfFirstDoctor, indexOfLastDoctor);
+    const totalPages = Math.ceil(filteredDoctors.length / itemsPerPage);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
     return (
         <div className="w-full">
-            <form onSubmit={onSubmitHandler} className="m-5 ">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <form onSubmit={onSubmitHandler} className="m-5">
+                <div className="flex flex-col border rounded-lg md:flex-row px-4 py-4 justify-between bg-white items-start md:items-center gap-4">
                     <h1 className="text-2xl font-bold text-gray-800">Quản lý bác sĩ</h1>
                     <button type="button" onClick={() => setIsAddingNew(!isAddingNew)} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center">
                         <PlusIcon className="h-5 w-5 mr-2" />
@@ -102,14 +129,14 @@ const AddDoctor = () => {
                 </div>
 
                 {isAddingNew && (
-                    <div className="bg-white px-8 border py-8 rounded w-full max-w-5xl  overflow-y-scroll">
+                    <div className="bg-white px-8 border py-8 rounded w-full max-w-5xl overflow-y-scroll">
                         <div className="flex items-center gap-4 mb-8 text-gray-500">
                             <label htmlFor="doc-img">
-                                <img className="w-16 bg-gray-100  rounded-full cursor-pointer" src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
+                                <img className="w-16 bg-gray-100 rounded-full cursor-pointer" src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
                             </label>
                             <input onChange={(e) => setDocImg(e.target.files[0])} type="file" id="doc-img" hidden />
                             <p>
-                                Upload <br /> Ảnh{" "}
+                                Upload <br /> Ảnh
                             </p>
                         </div>
 
@@ -132,7 +159,7 @@ const AddDoctor = () => {
 
                                 <div className="flex-1 flex flex-col gap-1">
                                     <p>Kinh Nghiệm</p>
-                                    <select onChange={(e) => setExperience(e.target.value)} value={experience} className="border rounded px-3 py-2" name="" id="">
+                                    <select onChange={(e) => setExperience(e.target.value)} value={experience} className="border rounded px-3 py-2">
                                         {[...Array(12)].map((_, i) => {
                                             const year = i + 1;
                                             return (
@@ -158,7 +185,7 @@ const AddDoctor = () => {
                             <div className="w-full lg:flex-1 flex flex-col gap-4">
                                 <div className="flex-1 flex flex-col gap-1">
                                     <p>Chuyên ngành</p>
-                                    <select onChange={(e) => setSpeciality(e.target.value)} value={speciality} className="border rounded px-3 py-2" name="" id="">
+                                    <select onChange={(e) => setSpeciality(e.target.value)} value={speciality} className="border rounded px-3 py-2">
                                         {departmentData.map((item, index) => (
                                             <option key={index} value={item.name}>
                                                 {item.name}
@@ -184,7 +211,7 @@ const AddDoctor = () => {
 
                                 <div className="flex-1 flex flex-col gap-1">
                                     <p>Giới tính</p>
-                                    <select onChange={(e) => setSex(e.target.value)} value={sex} className="border rounded px-3 py-2" name="" id="">
+                                    <select onChange={(e) => setSex(e.target.value)} value={sex} className="border rounded px-3 py-2">
                                         <option value="Nam">Nam</option>
                                         <option value="Nữ">Nữ</option>
                                     </select>
@@ -194,7 +221,7 @@ const AddDoctor = () => {
 
                         <div>
                             <p className="pt-4 pb-2">Mô Tả Khác</p>
-                            <textarea onChange={(e) => setAbout(e.target.value)} value={about} className="w-full px-4 pt-2 border rounded" placeholder="Viết những mô tả khác của bác sĩ" rows={5} required />
+                            <TiptapEditor value={about} onChange={setAbout} />
                         </div>
 
                         <button type="submit" className="bg-primary px-10 py-3 mt-4 text-white rounded-full">
@@ -222,7 +249,6 @@ const AddDoctor = () => {
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Chuyên khoa
                                 </th>
-
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Đánh giá
                                 </th>
@@ -235,12 +261,11 @@ const AddDoctor = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredDoctors.map((doctor) => (
+                            {currentDoctors.map((doctor) => (
                                 <tr key={doctor.id}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <img src={doctor.image} alt="" className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium" />
-
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{doctor.name}</div>
                                             </div>
@@ -254,7 +279,7 @@ const AddDoctor = () => {
                                             <span className="text-sm text-gray-900 mr-2">5</span>
                                             <div className="flex">
                                                 {[...Array(5)].map((_, i) => (
-                                                    <svg key={i} className={"h-4 w-4 text-yellow-400"} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <svg key={i} className="h-4 w-4 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
                                                 ))}
@@ -285,12 +310,19 @@ const AddDoctor = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-700">
-                                Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">5</span> của <span className="font-medium">{doctorData.length}</span> bác sĩ
+                                Hiển thị <span className="font-medium">{indexOfFirstDoctor + 1}</span> đến <span className="font-medium">{Math.min(indexOfLastDoctor, filteredDoctors.length)}</span> của <span className="font-medium">{filteredDoctors.length}</span> bác sĩ
                             </p>
                         </div>
                         <div className="flex-1 flex justify-between sm:justify-end">
-                            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Trước</button>
-                            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Sau</button>
+                            <button onClick={handlePrevPage} disabled={currentPage === 1} className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Trước
+                            </button>
+                            <div className="mx-2 flex items-center text-sm text-gray-700">
+                                Trang {currentPage} / {totalPages}
+                            </div>
+                            <button onClick={handleNextPage} disabled={currentPage === totalPages} className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Sau
+                            </button>
                         </div>
                     </div>
                 </div>

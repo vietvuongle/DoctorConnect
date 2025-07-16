@@ -4,6 +4,7 @@ import { ArrowLeftIcon, SaveIcon, UserIcon, MailIcon, CircleDollarSign, PhoneIco
 import { AdminContext } from "../../context/AdminContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import TiptapEditor from "../../components/TiptapEditor";
 const DoctorDetail = () => {
     const { doctorId } = useParams();
 
@@ -71,10 +72,6 @@ const DoctorDetail = () => {
                 formData.append("image", editForm.image);
             }
 
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
-
             const { data } = await axios.post(backendUrl + "/api/admin/update-doctor", formData, {
                 headers: {
                     Authorization: `Bearer ${aToken}`,
@@ -108,14 +105,6 @@ const DoctorDetail = () => {
         docInfo && (
             <div className="min-h-screen bg-gray-100 py-8 w-full">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="mb-8 flex items-center justify-between">
-                        <div className="flex items-center">
-                            <Link to="/admin/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                                Quay lại
-                            </Link>
-                        </div>
-                    </div>
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-2xl font-bold text-gray-900">Thông tin chi tiết bác sĩ</h2>
@@ -319,42 +308,117 @@ const DoctorDetail = () => {
                                     <div className="mt-6">
                                         <div className="flex mb-2 text-lg items-center font-medium text-gray-700">
                                             <FileTextIcon className="w-5 h-5 inline-block mr-2" />
-                                            <p>Giới thiệu</p>
+                                            <p className="text-2xl">Giới thiệu</p>
                                         </div>
                                         {isEditing ? (
-                                            <textarea
-                                                name="about"
-                                                value={editForm.about}
-                                                onChange={(e) => setEditForm((prev) => ({ ...prev, about: e.target.value }))}
-                                                rows={4}
-                                                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-200"
-                                            />
+                                            <div>
+                                                <TiptapEditor value={editForm.about} onChange={(html) => setEditForm((prev) => ({ ...prev, about: html }))} />
+                                            </div>
                                         ) : (
-                                            <p className="mt-1 text-gray-600">{docInfo.about}</p>
+                                            <div className="font-calibri overflow-y-auto p-4 bg-gray-50 rounded-md border border-gray-200 shadow-sm tiptap-content" dangerouslySetInnerHTML={{ __html: docInfo.about }} />
                                         )}
                                     </div>
                                 </div>
                             </div>
-                            <div></div>
-                            <div className="flex justify-end items-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsEditing(!isEditing);
-                                        handleStartEdit();
-                                    }}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    Chỉnh sửa
-                                </button>
-                                <button type="submit" className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                    <SaveIcon className="w-5 h-5 mr-2" />
-                                    <p>Lưu thay đổi</p>
-                                </button>
+
+                            <div className="flex justify-between items-end gap-2">
+                                <div className=" flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <Link to="/admin/doctor" className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                            <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                                            Quay lại
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    {!isEditing && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsEditing(!isEditing);
+                                                handleStartEdit();
+                                            }}
+                                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                        >
+                                            Chỉnh sửa
+                                        </button>
+                                    )}
+                                    {isEditing && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsEditing(false);
+                                                }}
+                                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                                            >
+                                                Hủy
+                                            </button>
+
+                                            <button type="submit" className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                                <SaveIcon className="w-5 h-5 mr-2" />
+                                                <p>Lưu thay đổi</p>
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
+                <style>
+                    {`
+          .font-calibri {
+            font-family: 'Calibri', 'Arial', sans-serif;
+          }
+          .tiptap-content {
+            font-family: 'Calibri', 'Arial', sans-serif !important;
+            font-size: 11pt;
+            line-height: 1.15;
+            color: #2E2E2E;
+          }
+          .tiptap-content p {
+            margin: 0 0 4pt 0;
+          }
+          .tiptap-content h1 {
+            font-size: 26pt;
+            font-weight: bold;
+            margin: 22pt 0 12pt 0;
+            line-height: 1.1;
+            color: #2E2E2E;
+          }
+          .tiptap-content h2 {
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 18pt 0 10pt 0;
+            line-height: 1.1;
+            color: #2E2E2E;
+          }
+          .tiptap-content h3 {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 14pt 0 8pt 0;
+            line-height: 1.1;
+            color: #2E2E2E;
+          }
+          .tiptap-content ul,
+          .tiptap-content ol {
+            padding-left: 36pt;
+            margin: 11pt 0;
+          }
+          .tiptap-content ul li,
+          .tiptap-content ol li {
+            margin-bottom: 6pt;
+            line-height: 1.15;
+          }
+          .tiptap-content ul {
+            list-style-type: disc;
+          }
+          .tiptap-content ol {
+            list-style-type: decimal;
+          }
+        `}
+                </style>
             </div>
         )
     );

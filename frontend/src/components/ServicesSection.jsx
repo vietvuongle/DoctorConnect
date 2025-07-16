@@ -3,8 +3,11 @@ import { Stethoscope as StethoscopeIcon, Heart as HeartIcon, Brain as BrainIcon,
 import { assets } from "../assets/assets";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
+import { Link, useNavigate } from "react-router-dom";
 
 export function ServicesSection() {
+    const { handleSmoothScroll } = useContext(AppContext);
+
     const services = [
         {
             icon: <StethoscopeIcon className="h-8 w-8 text-blue-600" />,
@@ -39,6 +42,7 @@ export function ServicesSection() {
     ];
 
     const { departmentData } = useContext(AppContext);
+    const navigate = useNavigate();
 
     return (
         <section id="services" className="py-16 bg-white">
@@ -48,18 +52,29 @@ export function ServicesSection() {
                     <p className="text-gray-600 max-w-2xl mx-auto">Phòng khám của chúng tôi cung cấp nhiều dịch vụ y tế chất lượng cao với đội ngũ bác sĩ chuyên môn và trang thiết bị hiện đại.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {departmentData.map((item, index) => (
+                    {departmentData.slice(0, 6).map((item, index) => (
                         <div key={index} className="bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-start">
                             <img src={item.iconImage} className="bg-blue-50 ml-3 rounded-full w-20 h-20 mt-5 mb-4" alt="" />
                             <div className="p-4">
                                 <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.name}</h3>
                                 <p className="text-gray-600">{item.description}</p>
-                                <a href="#" className="mt-4 inline-block text-blue-600 font-medium hover:text-blue-700">
+                                <Link to={`/department/${item.id}`} onClick={() => handleSmoothScroll()} className="mt-4 inline-block text-blue-600 font-medium hover:text-blue-700">
                                     Chi tiết →
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     ))}
+                </div>
+                <div className="mt-12 text-center">
+                    <button
+                        onClick={() => {
+                            navigate("/departments");
+                            handleSmoothScroll();
+                        }}
+                        className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
+                    >
+                        Xem thêm
+                    </button>
                 </div>
             </div>
         </section>

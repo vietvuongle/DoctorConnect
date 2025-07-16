@@ -8,11 +8,12 @@ import { AppContext } from "../context/AppContext";
 export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
-    const { token, setToken } = useContext(AppContext);
+    const { token, setToken, userProfile } = useContext(AppContext);
 
     const logout = () => {
         setToken(false);
         localStorage.removeItem("token");
+        localStorage.removeItem("userId");
     };
 
     return (
@@ -36,18 +37,33 @@ export function Header() {
                         <NavLink to="/doctors" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
                             Bác sĩ
                         </NavLink>
+                        <NavLink to="/departments" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
+                            Khoa
+                        </NavLink>
+                        <NavLink to="/clinics" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
+                            Phòng khám
+                        </NavLink>
 
-                        <NavLink to="/appointment" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
+                        <NavLink
+                            to={token ? "/appointment" : "#"}
+                            onClick={(e) => {
+                                if (!token) {
+                                    e.preventDefault(); // Ngăn điều hướng
+                                    navigate("/login");
+                                }
+                            }}
+                            className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}
+                        >
                             Đặt lịch
                         </NavLink>
 
                         <NavLink to="/contact" className={({ isActive }) => (isActive ? "text-blue-600 font-semibold" : "text-gray-600 hover:text-blue-600 transition-colors")}>
-                            Liên hệ
+                            Hợp tác
                         </NavLink>
 
                         {token ? (
                             <div className="flex items-center gap-4 cursor-pointer group relative">
-                                <img className="w-10 rounded-full" src={assets.upload_area} alt="" />
+                                <img className="w-10 rounded-full" src={userProfile.image ? userProfile.image : assets.upload_area} alt="" />
                                 <img className="w-2.5" src={assets.dropdown_icon} alt="" />
                                 <div className="absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block">
                                     <div className="min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4">

@@ -10,6 +10,7 @@ const AdminContextProvider = (props) => {
     const [departmentData, setDepartmentData] = useState([]);
     const [doctorData, setDoctorData] = useState([]);
     const [appointmentData, setAppointmentData] = useState([]);
+    const [clinicData, setClinicData] = useState([]);
 
     const getDoctorData = async () => {
         try {
@@ -20,9 +21,7 @@ const AdminContextProvider = (props) => {
             } else {
                 toast.error("Error");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getDepartment = async () => {
@@ -34,16 +33,12 @@ const AdminContextProvider = (props) => {
             } else {
                 toast.error("Đã xảy ra lỗi");
             }
-        } catch (error) {
-            toast.error(error.message);
-        }
+        } catch (error) {}
     };
 
     const getAllAppointment = async () => {
         try {
             const { data } = await axios.get(backendUrl + "/api/admin/all-appointment", { headers: { Authorization: `Bearer ${aToken}` } });
-
-            console.log("data", data);
 
             if (data !== false) {
                 setAppointmentData(data.result);
@@ -55,6 +50,51 @@ const AdminContextProvider = (props) => {
         }
     };
 
+    const getAllClinic = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + "/api/admin/all-clinic", { headers: { Authorization: `Bearer ${aToken}` } });
+
+            if (data !== false) {
+                setClinicData(data.result);
+            } else {
+                toast.error("Error");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const calculateAge = (dobString) => {
+        const dob = new Date(dobString);
+        const today = new Date();
+
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        return age;
+    };
+
+    const formatDateHeader = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // tháng bắt đầu từ 0
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
+    function removeVietnameseTones(str) {
+        return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D");
+    }
+
     const value = {
         backendUrl,
         aToken,
@@ -65,13 +105,25 @@ const AdminContextProvider = (props) => {
         appointmentData,
         getDepartment,
         getDoctorData,
+        formatDateHeader,
+        calculateAge,
+        removeVietnameseTones,
+        getAllAppointment,
+        clinicData,
+        getAllClinic,
     };
 
     useEffect(() => {
         getDepartment();
         getDoctorData();
-        getAllAppointment();
-    }, []);
+    }, []); // chỉ chạy 1 lần khi mount
+
+    useEffect(() => {
+        if (aToken) {
+            getAllAppointment();
+            getAllClinic();
+        }
+    }, [aToken]); // chạy mỗi khi aToken thay đổi
 
     return <AdminContext.Provider value={value}>{props.children}</AdminContext.Provider>;
 };
